@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id String @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // TODO: Clerk
+
+  projects Project[]
+  countdowns Countdown[]
+}
+
+model Project {
+  id String @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name String
+
+  notes Note[]
+  sessions Session[]
+}
+
+model Note {
+  id String @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  header String
+  content String
+}
+
+model Countdown {
+  id String @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name String
+  description String?
+  sessionTime Int
+  shortBrake Int
+  longBrake Int?
+  overtime Int
+}
+
+model Session {
+  id String @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  start DateTime
+  stop DateTime
+  isStopwatch Boolean @default(false)
+  accumulatedMinutes Int @default(0)
+  isPaused Boolean @default(false)
+}
