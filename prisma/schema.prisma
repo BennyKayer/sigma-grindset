@@ -8,57 +8,75 @@ datasource db {
 }
 
 model User {
-  id String @id @default(uuid())
+  id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // TODO: Clerk
+  clerkId String @unique
 
-  projects Project[]
+  projects   Project[]
   countdowns Countdown[]
 }
 
 model Project {
-  id String @id @default(uuid())
+  id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   name String
 
-  notes Note[]
+  notes    Note[]
   sessions Session[]
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+
+  @@unique([userId, id])
 }
 
 model Note {
-  id String @id @default(uuid())
+  id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  header String
-  content String
+  header    String
+  content   String
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+
+  @@unique([projectId, id])
 }
 
 model Countdown {
-  id String @id @default(uuid())
+  id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  name String
+  name        String
   description String?
   sessionTime Int
-  shortBrake Int
-  longBrake Int?
-  overtime Int
+  shortBrake  Int
+  longBrake   Int?
+  overtime    Int
+  User        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+
+  @@unique([id, userId])
 }
 
 model Session {
-  id String @id @default(uuid())
+  id        String   @id @default(uuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  start DateTime
-  stop DateTime
-  isStopwatch Boolean @default(false)
-  accumulatedMinutes Int @default(0)
-  isPaused Boolean @default(false)
+  start              DateTime
+  stop               DateTime
+  isStopwatch        Boolean  @default(false)
+  accumulatedMinutes Int      @default(0)
+  isPaused           Boolean  @default(false)
+
+  project            Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId          String
+
+  @@unique([id, projectId])
 }

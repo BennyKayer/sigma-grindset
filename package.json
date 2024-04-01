@@ -1,35 +1,37 @@
 {
-  "name": "sigma-grindset",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
-  "dependencies": {
-    "@clerk/nextjs": "^4.29.9",
-    "@emotion/cache": "11.11.0",
-    "@emotion/react": "11.11.0",
-    "@emotion/styled": "11.11.0",
-    "@mui/icons-material": "5.15.11",
-    "@mui/material": "5.15.11",
-    "@mui/material-nextjs": "5.15.11",
-    "@prisma/client": "^5.11.0",
-    "next": "14.1.4",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "zod": "^3.22.4"
-  },
-  "devDependencies": {
-    "@types/node": "20.11.30",
-    "@types/react": "18.2.73",
-    "@types/react-dom": "18.2.22",
-    "eslint": "8.57.0",
-    "eslint-config-next": "14.1.4",
-    "prettier": "^3.2.5",
-    "prisma": "^5.11.0",
-    "typescript": "5.4.3"
-  }
+    "name": "sigma-grindset",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "dev": "ngrok http http://localhost:3000 & next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint"
+    },
+    "dependencies": {
+        "@clerk/nextjs": "^4.29.9",
+        "@clerk/themes": "^1.7.10",
+        "@emotion/cache": "11.11.0",
+        "@emotion/react": "11.11.0",
+        "@emotion/styled": "11.11.0",
+        "@mui/icons-material": "5.15.11",
+        "@mui/material": "5.15.11",
+        "@mui/material-nextjs": "5.15.11",
+        "@prisma/client": "^5.11.0",
+        "next": "14.1.4",
+        "react": "18.2.0",
+        "react-dom": "18.2.0",
+        "svix": "^1.21.0",
+        "zod": "^3.22.4"
+    },
+    "devDependencies": {
+        "@types/node": "20.11.30",
+        "@types/react": "18.2.73",
+        "@types/react-dom": "18.2.22",
+        "eslint": "8.57.0",
+        "eslint-config-next": "14.1.4",
+        "prettier": "^3.2.5",
+        "prisma": "^5.11.0",
+        "typescript": "5.4.3"
+    }
 }
