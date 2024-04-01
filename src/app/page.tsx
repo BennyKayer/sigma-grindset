@@ -3,7 +3,6 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import Link from "@mui/material/Link";
 import NextLink from "next/link";
-import Copyright from "@/components/Copyright";
 
 export default function Home() {
     return (
@@ -26,7 +25,6 @@ export default function Home() {
                 <Link href="/" color="secondary" component={NextLink}>
                     Go Home
                 </Link>
-                <Copyright />
             </Box>
         </Container>
     );
