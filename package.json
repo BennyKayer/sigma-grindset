@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "private": true,
     "scripts": {
-        "dev": "ngrok http http://localhost:3000 & next dev",
+        "dev": "ngrok http --domain=hot-enabling-muskox.ngrok-free.app 3000 & next dev",
         "build": "next build",
         "start": "next start",
         "lint": "next lint"
@@ -14,6 +14,7 @@
         "@emotion/cache": "11.11.0",
         "@emotion/react": "11.11.0",
         "@emotion/styled": "11.11.0",
+        "@formkit/tempo": "^0.0.19",
         "@mui/icons-material": "5.15.11",
         "@mui/material": "5.15.11",
         "@mui/material-nextjs": "5.15.11",

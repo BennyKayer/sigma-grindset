@@ -13,6 +13,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   clerkId String @unique
+  email   String @unique
 
   projects   Project[]
   countdowns Countdown[]
@@ -27,10 +28,8 @@ model Project {
 
   notes    Note[]
   sessions Session[]
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId   String
-
-  @@unique([userId, id])
 }
 
 model Note {
@@ -38,13 +37,11 @@ model Note {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  header    String
-  content   String
+  header  String
+  content String
 
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId String
-
-  @@unique([projectId, id])
 }
 
 model Countdown {
@@ -54,14 +51,17 @@ model Countdown {
 
   name        String
   description String?
+  // In minutes
   sessionTime Int
+  // In minutes
   shortBrake  Int
+  // In minutes, not applicable to methods like Circadian Rhytm
   longBrake   Int?
+  // In minutes
   overtime    Int
-  User        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId      String
 
-  @@unique([id, userId])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
 }
 
 model Session {
@@ -69,14 +69,16 @@ model Session {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // Timestamp when the session started
   start              DateTime
+  // Timestamp when it should end, with stopwatch it will be the same as start
   stop               DateTime
-  isStopwatch        Boolean  @default(false)
+  // When pausing calculate minutes passed and add them here
   accumulatedMinutes Int      @default(0)
   isPaused           Boolean  @default(false)
+  isStopwatch        Boolean  @default(false)
+  isOnGoing          Boolean  @default(true)
 
-  project            Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  projectId          String
-
-  @@unique([id, projectId])
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
 }

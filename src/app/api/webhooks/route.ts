@@ -52,13 +52,35 @@ export async function POST(req: Request) {
 
     // Create user in my db
     const eventType = evt.type;
+    const { id: clerkId } = evt.data as UserJSON;
     if (eventType === "user.created") {
         await prisma.user.create({
             data: {
-                clerkId: (evt.data as UserJSON).id,
+                clerkId,
+                email: evt.data.email_addresses[0].email_address,
             },
         });
         return new NextResponse("", { status: 201 });
+    }
+    // Delete user from my db
+    if (eventType === "user.deleted") {
+        await prisma.user.delete({
+            where: {
+                clerkId,
+            },
+        });
+        return new NextResponse("", { status: 204 });
+    }
+    // Update user in my db
+    if (eventType === "user.updated") {
+        await prisma.user.update({
+            where: {
+                clerkId,
+            },
+            data: {
+                email: evt.data.email_addresses[0].email_address,
+            },
+        });
     }
 
     return new NextResponse("", { status: 200 });
