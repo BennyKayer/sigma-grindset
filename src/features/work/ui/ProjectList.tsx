@@ -21,20 +21,15 @@ import AddCircleIcon from "@mui/icons-material/AddCircle";
 
 type AugmentedProject = {
     editing?: boolean;
+    editText?: string;
 } & Project;
 
 export default function ProjectList() {
-    const [projects, setProjects] = useState<Project[]>([]);
-    const [displayProjects, setDisplayProjects] = useState<AugmentedProject[]>(
-        [],
-    );
+    const [projects, setProjects] = useState<AugmentedProject[]>([]);
     const [newProjectName, setNewProjectName] = useState("");
     const [projectNameError, setProjectNameError] = useState(false);
     const [currentProjectId, setCurrentProjectId] =
         useState<AugmentedProject["id"]>("");
-    const [editedProject, setEditedProject] = useState<AugmentedProject | null>(
-        null,
-    );
 
     // SEC: handlers
     const handleNewProjectNameChange: TextFieldProps["onChange"] = (event) => {
@@ -56,7 +51,7 @@ export default function ProjectList() {
         }
 
         const newProject = await postNewProject(newProjectName);
-        setDisplayProjects([...displayProjects, newProject]);
+        setProjects([...projects, newProject]);
     };
 
     const handleCurrentProjectChange: RadioGroupProps["onChange"] = (event) => {
@@ -65,27 +60,36 @@ export default function ProjectList() {
     };
 
     const handleEditProjectStart = (project: AugmentedProject) => {
-        // TODO: When clicking on different item than the one being edited
-        // it won't update fix later
-        const newProjects = displayProjects.map((el) => {
-            if (el.id === project.id) {
-                const isEditing = project.editing;
-                // If editing close the edit and update the project
-                if (isEditing) {
-                    return { ...el, ...editedProject, editing: false };
-                }
-                // If not editing start the edit
-                else {
-                    return { ...el, editing: true };
-                }
+        const newProjects = projects.map((el) => {
+            if (el.editing) {
+                return {
+                    ...el,
+                    name: el.editText ? el.editText : el.name,
+                    editing: false,
+                };
             }
-            return { ...el, editing: false };
+            if (el.id === project.id) {
+                return {
+                    ...el,
+                    editing: !el.editing,
+                };
+            }
+            return el;
         });
-        setDisplayProjects(newProjects);
+        setProjects(newProjects);
     };
 
     const handleEditProject = (project: AugmentedProject, newName: string) => {
-        setEditedProject({ ...project, name: newName });
+        const updated = projects.map((el) => {
+            if (el.id === project.id) {
+                return {
+                    ...project,
+                    editText: newName,
+                };
+            }
+            return el;
+        });
+        setProjects(updated);
     };
 
     // SEC: useEffect
@@ -93,7 +97,7 @@ export default function ProjectList() {
         const setupProjects = async () => {
             const projects = await getProjects();
             setProjects(projects);
-            setDisplayProjects(projects);
+            setProjects(projects);
             if (projects.length) {
                 setCurrentProjectId(projects[0].id);
             }
@@ -131,7 +135,7 @@ export default function ProjectList() {
                     value={currentProjectId}
                     onChange={handleCurrentProjectChange}
                 >
-                    {displayProjects.map((el) => {
+                    {projects.map((el) => {
                         const { id, name, editing } = el;
                         return (
                             <ListItem
