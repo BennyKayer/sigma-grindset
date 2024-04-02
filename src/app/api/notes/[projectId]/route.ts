@@ -8,6 +8,10 @@ type Params = {
     };
 };
 
+// TODO: This should probably be nest under projects/id
+// however I don't anticipate adding /id for notes for now
+// that's why it stays here
+
 export const GET = async (_: NextRequest, params: Params) => {
     const {
         params: { projectId },

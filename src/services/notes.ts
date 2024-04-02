@@ -9,7 +9,7 @@ export const getProjectNotes = async (projectId: string) => {
     const url = `${ENDPOINT}/${projectId}`;
 
     const req = new Request(url, init);
-    const res = await fetch(req, init);
+    const res = await fetch(req);
 
     if (!res.ok) {
         throw new Error("Failed to fetch notes");
