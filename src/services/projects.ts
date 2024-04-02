@@ -6,7 +6,6 @@ const ENDPOINT = `${ENVS.apiUrl}/projects`;
 export const getProjects = async () => {
     const init: RequestInit = {
         method: "GET",
-        credentials: "include",
     };
 
     const req = new Request(ENDPOINT, init);
@@ -19,7 +18,23 @@ export const getProjects = async () => {
     return data as Project[];
 };
 
-// TODO: Post
+export const postNewProject = async (name: string) => {
+    const init: RequestInit = {
+        method: "POST",
+        body: JSON.stringify({
+            name,
+        }),
+    };
+
+    const req = new Request(ENDPOINT, init);
+    const res = await fetch(req);
+
+    if (!res.ok) {
+        throw new Error("Failed to create new project");
+    }
+    const { data } = await res.json();
+    return data as Project;
+};
 
 // TODO: Patch
 
