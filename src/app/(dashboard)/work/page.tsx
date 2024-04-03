@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { ProjectList } from "@/features/work";
+import { NewNote, NotesCarousel, ProjectList } from "@/features/work";
 
 export default function WorkPage() {
     return (
@@ -7,10 +7,25 @@ export default function WorkPage() {
             sx={{
                 display: "grid",
                 gridTemplateColumns: "1fr 2fr",
-                gridTemplateRows: "calc(100vh - 48px - 64px)", // TODO: Change to 2 rows later
+                gridTemplateRows: "repeat(2, 43vh)",
+                gap: 2,
             }}
         >
-            <ProjectList />
+            <ProjectList
+                sx={{
+                    gridRow: "1 / span 2",
+                }}
+            />
+            <Box
+                sx={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 2fr",
+                    gap: 1,
+                }}
+            >
+                <NewNote />
+                <NotesCarousel />
+            </Box>
         </Box>
     );
 }

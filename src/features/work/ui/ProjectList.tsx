@@ -3,6 +3,7 @@
 import {
     Autocomplete,
     Box,
+    BoxProps,
     IconButton,
     List,
     ListItem,
@@ -24,7 +25,8 @@ type AugmentedProject = {
     editText?: string;
 } & Project;
 
-export default function ProjectList() {
+type ProjectListProps = {} & BoxProps;
+export default function ProjectList(props: ProjectListProps) {
     const [projects, setProjects] = useState<AugmentedProject[]>([]);
     const [newProjectName, setNewProjectName] = useState("");
     const [projectNameError, setProjectNameError] = useState(false);
@@ -106,7 +108,7 @@ export default function ProjectList() {
     }, []);
 
     return (
-        <Box>
+        <Box {...props}>
             <List
                 sx={{
                     width: "100%",
