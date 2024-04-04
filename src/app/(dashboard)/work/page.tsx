@@ -4,6 +4,7 @@ import {
     NewNote,
     NotesCarousel,
     ProjectList,
+    Countdown,
 } from "@/features/work";
 
 export default function WorkPage() {
@@ -39,6 +40,7 @@ export default function WorkPage() {
                 }}
             >
                 <CountdownsList />
+                <Countdown />
             </Box>
         </Box>
     );

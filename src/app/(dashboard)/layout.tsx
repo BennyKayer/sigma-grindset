@@ -15,6 +15,7 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import { DrawerLinks, LINKS } from "@/features/menu";
 import { usePathname } from "next/navigation";
+import { WorkProvider } from "@/features/work";
 
 const drawerWidth = 140;
 
@@ -92,7 +93,7 @@ export default function DashBoardLayout({ children }: DashBoardLayoutProps) {
                         }}
                         open
                     >
-                        <DrawerLinks />
+                        <DrawerLinks pathname={pathname} />
                     </Drawer>
                 ) : (
                     <Drawer
@@ -110,7 +111,7 @@ export default function DashBoardLayout({ children }: DashBoardLayoutProps) {
                             },
                         }}
                     >
-                        <DrawerLinks />
+                        <DrawerLinks pathname={pathname} />
                     </Drawer>
                 )}
             </Box>
@@ -123,7 +124,7 @@ export default function DashBoardLayout({ children }: DashBoardLayoutProps) {
                 }}
             >
                 <Toolbar />
-                {children}
+                <WorkProvider>{children}</WorkProvider>
             </Box>
         </Box>
     );

@@ -10,19 +10,19 @@ import {
     IconButton,
 } from "@mui/material";
 import { Countdown } from "@prisma/client";
-import { useState, useEffect, MouseEventHandler } from "react";
+import { useState, useEffect, useContext } from "react";
 import { getUserCountdowns } from "@/services/countdown";
 import SettingsIcon from "@mui/icons-material/Settings";
+import { WorkContext } from "@/features/work";
 
-type CountdownsProps = {} & BoxProps;
-export default function Countdowns(props: CountdownsProps) {
+type CountdownsListProps = {} & BoxProps;
+export default function CountdownsList(props: CountdownsListProps) {
     const [countdowns, setCountdowns] = useState<Countdown[]>([]);
-    const [currentCountdownId, setCurrentCountdownId] =
-        useState<Countdown["id"]>("");
+    const { setCurrentCountdown, currentCountdown } = useContext(WorkContext);
 
     // SEC: handlers
-    const handleSelectCountdown = (newCountdownId: string) => {
-        setCurrentCountdownId(newCountdownId);
+    const handleSelectCountdown = (newCountdown: Countdown | null) => {
+        setCurrentCountdown(newCountdown);
     };
 
     // SEC: useEffect
@@ -31,7 +31,7 @@ export default function Countdowns(props: CountdownsProps) {
             const userCountdowns = await getUserCountdowns();
             setCountdowns(userCountdowns);
             if (userCountdowns.length) {
-                setCurrentCountdownId(userCountdowns[0].id);
+                setCurrentCountdown(userCountdowns[0]);
             }
         };
         setupCountdowns();
@@ -46,6 +46,14 @@ export default function Countdowns(props: CountdownsProps) {
                     bgcolor: "background.paper",
                 }}
             >
+                <ListItem disablePadding>
+                    <ListItemButton
+                        selected={currentCountdown === null}
+                        onClick={() => handleSelectCountdown(null)}
+                    >
+                        <ListItemText primary={"Stopwatch"} />
+                    </ListItemButton>
+                </ListItem>
                 {countdowns.map((el) => {
                     const { id, name } = el;
                     return (
@@ -59,8 +67,8 @@ export default function Countdowns(props: CountdownsProps) {
                             disablePadding
                         >
                             <ListItemButton
-                                selected={id === currentCountdownId}
-                                onClick={() => handleSelectCountdown(id)}
+                                selected={id === currentCountdown?.id}
+                                onClick={() => handleSelectCountdown(el)}
                             >
                                 <ListItemText primary={name} />
                             </ListItemButton>

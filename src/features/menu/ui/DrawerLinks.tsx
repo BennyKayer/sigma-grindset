@@ -14,7 +14,10 @@ import {
 } from "@mui/material";
 import Copyright from "./Copyright";
 
-export default function DrawerLinks() {
+type DrawerLinksProps = {
+    pathname: string;
+};
+export default function DrawerLinks({ pathname }: DrawerLinksProps) {
     return (
         <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
             <Box>
@@ -56,13 +59,10 @@ export default function DrawerLinks() {
                                 href={href}
                                 component={Link}
                             >
-                                <ListItem
-                                    // sx={{
-                                    //     backgroundColor: "red",
-                                    // }} // TODO: Some selected item indicator
-                                    disablePadding
-                                >
-                                    <ListItemButton>
+                                <ListItem disablePadding>
+                                    <ListItemButton
+                                        selected={href === pathname}
+                                    >
                                         <ListItemIcon>
                                             <link.icon />
                                         </ListItemIcon>
