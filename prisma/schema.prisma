@@ -50,14 +50,12 @@ model Countdown {
   updatedAt DateTime @updatedAt
 
   name        String
-  description String?
-  // In minutes
+  description String? @db.Text
+  // All times in minutes
   sessionTime Int
-  // In minutes
   shortBrake  Int
-  // In minutes, not applicable to methods like Circadian Rhytm
   longBrake   Int?
-  // In minutes
+  longBrakeInterval Int?
   overtime    Int
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)

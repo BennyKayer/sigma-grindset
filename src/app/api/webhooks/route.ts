@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { UserJSON, WebhookEvent } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/db";
+import countdownsJson from "@/data/countdowns.json";
 
 export async function POST(req: Request) {
     // You can find this in the Clerk Dashboard -> Webhooks -> choose the webhook
@@ -54,11 +55,20 @@ export async function POST(req: Request) {
     const eventType = evt.type;
     const { id: clerkId } = evt.data as UserJSON;
     if (eventType === "user.created") {
-        await prisma.user.create({
+        const newUser = await prisma.user.create({
             data: {
                 clerkId,
                 email: evt.data.email_addresses[0].email_address,
             },
+        });
+        const countdowns = countdownsJson.map((el) => {
+            return {
+                ...el,
+                userId: newUser.id,
+            };
+        });
+        await prisma.countdown.createMany({
+            data: countdowns,
         });
         return new NextResponse("", { status: 201 });
     }
@@ -69,7 +79,7 @@ export async function POST(req: Request) {
                 clerkId,
             },
         });
-        return new NextResponse("", { status: 204 });
+        return new NextResponse(undefined, { status: 204 });
     }
     // Update user in my db
     if (eventType === "user.updated") {

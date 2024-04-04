@@ -99,7 +99,6 @@ export default function ProjectList(props: ProjectListProps) {
         const setupProjects = async () => {
             const projects = await getProjects();
             setProjects(projects);
-            setProjects(projects);
             if (projects.length) {
                 setCurrentProjectId(projects[0].id);
             }

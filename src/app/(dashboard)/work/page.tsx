@@ -1,5 +1,10 @@
 import { Box } from "@mui/material";
-import { NewNote, NotesCarousel, ProjectList } from "@/features/work";
+import {
+    Countdowns,
+    NewNote,
+    NotesCarousel,
+    ProjectList,
+} from "@/features/work";
 
 export default function WorkPage() {
     return (
@@ -25,6 +30,15 @@ export default function WorkPage() {
             >
                 <NewNote />
                 <NotesCarousel />
+            </Box>
+            <Box
+                sx={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 2fr",
+                    gap: 1,
+                }}
+            >
+                <Countdowns />
             </Box>
         </Box>
     );

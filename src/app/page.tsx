@@ -24,7 +24,12 @@ export default function Home() {
                     Grind your way to greatness
                 </Typography>
                 {LINKS.map((el) => (
-                    <Link href={el.href} color="secondary" component={NextLink}>
+                    <Link
+                        key={el.id}
+                        href={el.href}
+                        color="secondary"
+                        component={NextLink}
+                    >
                         {el.label}
                     </Link>
                 ))}
