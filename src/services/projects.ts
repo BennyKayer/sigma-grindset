@@ -36,7 +36,24 @@ export const postNewProject = async (name: string) => {
     return data as Project;
 };
 
-// TODO: Patch
+export const patchProject = async (name: string, id: string) => {
+    const init: RequestInit = {
+        method: "PATCH",
+        body: JSON.stringify({
+            name,
+        }),
+    };
+    const url = `${ENDPOINT}/${id}`;
+
+    const req = new Request(url, init);
+    const res = await fetch(req);
+
+    if (!res.ok) {
+        throw new Error("Failed to patch a project");
+    }
+    const { data } = await res.json();
+    return data as Project;
+};
 
 // SEC: Session
 export const getLatestSession = async (projectId: string) => {

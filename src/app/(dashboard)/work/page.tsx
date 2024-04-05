@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 import {
-    CountdownsList,
+    TimerList,
     NewNote,
     NotesCarousel,
     ProjectList,
@@ -39,7 +39,7 @@ export default function WorkPage() {
                     gap: 1,
                 }}
             >
-                <CountdownsList />
+                <TimerList />
                 <Countdown />
             </Box>
         </Box>

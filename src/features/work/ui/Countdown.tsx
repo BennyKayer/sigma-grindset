@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import { Gauge } from "@mui/x-charts/Gauge";
 import { useEffect, useState, useContext } from "react";
-import { WorkContext } from "@/features/work";
+import { WorkContext, minToTime } from "@/features/work";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import StopIcon from "@mui/icons-material/Stop";
@@ -20,8 +20,7 @@ enum CountdownState {
 }
 
 export default function Countdown() {
-    const { currentCountdown } = useContext(WorkContext);
-    const [minutes, setMinutes] = useState("00:00");
+    const { currentCountdown, currentProject } = useContext(WorkContext);
     const [countdownState, setCountdownState] = useState<CountdownState>(
         CountdownState.STOPPED,
     );
@@ -31,10 +30,14 @@ export default function Countdown() {
         _,
         value,
     ) => {
-        setCountdownState(value[0]);
+        const state = value[0] as CountdownState;
+        setCountdownState(state);
     };
 
     // SEC: useEffect
+    useEffect(() => {
+        // console.log(currentProject);
+    }, [currentProject]);
     // useEffect(() => {
     //     const interval = setInterval(() => {
     //         setMinutes(minutes - 1);
@@ -64,8 +67,10 @@ export default function Countdown() {
                 width={300}
                 startAngle={0}
                 endAngle={360}
-                text={({ value, valueMax }) => {
-                    return `${value} / ${valueMax}`;
+                text={() => {
+                    return countdownState === CountdownState.STARTED
+                        ? `TODO`
+                        : `${minToTime(currentCountdown?.sessionTime)}`;
                 }}
             />
             <ToggleButtonGroup onChange={handleCountdownStateChange}>
