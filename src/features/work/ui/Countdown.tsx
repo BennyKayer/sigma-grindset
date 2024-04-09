@@ -39,18 +39,16 @@ export default function Countdown() {
     };
 
     // SEC: useEffect
-    useEffect(() => {
-        // console.log(currentProject);
-    }, [currentProject]);
-
     // Retrieve session
     useEffect(() => {
         const retrieveLatestSession = async () => {
             const latestSession = await getLatestSession(currentProject?.id);
             setCurrentSession(latestSession);
         };
-        retrieveLatestSession();
-    }, []);
+        if (currentProject?.id) {
+            retrieveLatestSession();
+        }
+    }, [currentProject]);
 
     // Manage countdown state changes
     useEffect(() => {
@@ -77,9 +75,14 @@ export default function Countdown() {
         };
 
         if (currentSession) {
-            // TODO: Handle session restore
-            // this will handle breaks, paused
-            console.log(currentSession);
+            const { isOnGoing, isPaused } = currentSession;
+            if (isOnGoing) {
+                setCountdownState(CountdownState.STARTED);
+            }
+            if (isPaused) {
+                setCountdownState(CountdownState.PAUSED);
+            }
+
             interval = setInterval(() => {
                 const { stop: stopTime } = currentSession;
 
@@ -94,20 +97,6 @@ export default function Countdown() {
             clearInterval(interval);
         };
     }, [countdownState, currentSession]);
-
-    // useEffect(() => {
-    //     const interval = setInterval(() => {
-    //         setMinutes(minutes - 1);
-    //     }, 1000);
-
-    //     if (minutes <= 0) {
-    //         clearInterval(interval);
-    //     }
-
-    //     return () => {
-    //         clearInterval(interval);
-    //     };
-    // }, [minutes, setMinutes]);
 
     return (
         <Box

@@ -1,3 +1,4 @@
+// TODO: DRY, tests, single responsibility
 export const minToTime = (minutes: number | undefined): string => {
     if (!minutes) return "00:00";
 
