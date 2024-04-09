@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/utils/db";
 import { toBoolean } from "@/utils/types";
+import { addMinute } from "@formkit/tempo";
+import { NewSessionBody } from "@/services/projects";
 
 type Params = {
     params: {
-        projectId: string;
+        id: string;
     };
 };
 
 export const GET = async (req: NextRequest, params: Params) => {
     const {
-        params: { projectId },
+        params: { id: projectId },
     } = params;
     const { searchParams } = new URL(req.url);
     const shouldGetLatest = toBoolean(searchParams.get("latest"));
@@ -31,4 +33,23 @@ export const GET = async (req: NextRequest, params: Params) => {
         },
     });
     return NextResponse.json({ data: projectSessions });
+};
+
+export const POST = async (req: NextRequest, params: Params) => {
+    const {
+        params: { id: projectId },
+    } = params;
+    const { sessionTime } = (await req.json()) as NewSessionBody;
+
+    const start = new Date();
+    const newSession = await prisma.session.create({
+        data: {
+            projectId,
+            start,
+            stop: sessionTime ? addMinute(start, sessionTime) : start,
+            isStopwatch: sessionTime ? false : true,
+        },
+    });
+
+    return NextResponse.json({ data: newSession });
 };

@@ -4,7 +4,7 @@ import NotesCarousel from "@/features/work/ui/NotesCarousel";
 import TimerList from "@/features/work/ui/TimerList";
 import Countdown from "@/features/work/ui/Countdown";
 import { WorkProvider, WorkContext } from "@/features/work/context";
-import { minToTime } from "@/features/work/work.utils";
+import { minToTime, getDiff } from "@/features/work/work.utils";
 
 export {
     ProjectList,
@@ -15,4 +15,5 @@ export {
     WorkProvider,
     WorkContext,
     minToTime,
+    getDiff,
 };

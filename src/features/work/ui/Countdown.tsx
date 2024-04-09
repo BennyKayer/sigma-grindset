@@ -8,10 +8,12 @@ import {
 } from "@mui/material";
 import { Gauge } from "@mui/x-charts/Gauge";
 import { useEffect, useState, useContext } from "react";
-import { WorkContext, minToTime } from "@/features/work";
+import { WorkContext, getDiff, minToTime } from "@/features/work";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import StopIcon from "@mui/icons-material/Stop";
+import { createNewSession, getLatestSession } from "@/services/projects";
+import { Session } from "@prisma/client";
 
 enum CountdownState {
     STOPPED = "STOPPED",
@@ -24,6 +26,8 @@ export default function Countdown() {
     const [countdownState, setCountdownState] = useState<CountdownState>(
         CountdownState.STOPPED,
     );
+    const [currentSession, setCurrentSession] = useState<Session | null>(null);
+    const [sessionDisplay, setSessionDisplay] = useState("00:00");
 
     // SEC: handlers
     const handleCountdownStateChange: ToggleButtonGroupProps["onChange"] = (
@@ -38,6 +42,59 @@ export default function Countdown() {
     useEffect(() => {
         // console.log(currentProject);
     }, [currentProject]);
+
+    // Retrieve session
+    useEffect(() => {
+        const retrieveLatestSession = async () => {
+            const latestSession = await getLatestSession(currentProject?.id);
+            setCurrentSession(latestSession);
+        };
+        retrieveLatestSession();
+    }, []);
+
+    // Manage countdown state changes
+    useEffect(() => {
+        let interval: any; // TODO: Types
+
+        const handleNewSession = async () => {
+            switch (countdownState) {
+                case CountdownState.STARTED:
+                    const newSession = await createNewSession(
+                        currentProject?.id,
+                        {
+                            sessionTime: currentCountdown
+                                ? currentCountdown.sessionTime
+                                : null,
+                        },
+                    );
+                    const display = getDiff(newSession.stop);
+                    setSessionDisplay(display);
+                    setCurrentSession(newSession);
+                    break;
+                default:
+                    break;
+            }
+        };
+
+        if (currentSession) {
+            // TODO: Handle session restore
+            // this will handle breaks, paused
+            console.log(currentSession);
+            interval = setInterval(() => {
+                const { stop: stopTime } = currentSession;
+
+                const display = getDiff(stopTime);
+                setSessionDisplay(display);
+            }, 800);
+        } else {
+            handleNewSession();
+        }
+
+        return () => {
+            clearInterval(interval);
+        };
+    }, [countdownState, currentSession]);
+
     // useEffect(() => {
     //     const interval = setInterval(() => {
     //         setMinutes(minutes - 1);
@@ -69,7 +126,7 @@ export default function Countdown() {
                 endAngle={360}
                 text={() => {
                     return countdownState === CountdownState.STARTED
-                        ? `TODO`
+                        ? sessionDisplay
                         : `${minToTime(currentCountdown?.sessionTime)}`;
                 }}
             />
