@@ -1,5 +1,22 @@
 import { expect, test, describe } from "vitest";
-import { getNormalizedParts, TimeUnit, getTimeDisplay } from "@/features/work";
+import {
+    getNormalizedParts,
+    TimeUnit,
+    getTimeDisplay,
+    getDiff,
+} from "@/features/work";
+import { addMinute } from "@formkit/tempo";
+
+describe("getDiff", () => {
+    test("test pomodoro", () => {
+        const start = new Date();
+        const stop = addMinute(new Date(), 25);
+        const diff = getDiff(start, stop);
+        // Round to the nearest second to avoid insignificant ms differences
+        const roundedDiff = Math.round(diff / 100000) * 100000;
+        expect(roundedDiff).eq(25 * 60 * 1000);
+    });
+});
 
 describe("getTimeDisplay", () => {
     test("milliseconds input", () => {

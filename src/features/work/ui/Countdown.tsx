@@ -19,7 +19,7 @@ import PauseIcon from "@mui/icons-material/Pause";
 import StopIcon from "@mui/icons-material/Stop";
 import { createNewSession, getLatestSession } from "@/services/projects";
 import { Session } from "@prisma/client";
-import { patchEndSession } from "../../../services/session";
+import { patchEndSession } from "@/services/session";
 
 enum CountdownState {
     STOPPED = "STOPPED",
@@ -34,6 +34,8 @@ export default function Countdown() {
     );
     const [currentSession, setCurrentSession] = useState<Session | null>(null);
     const [sessionDisplay, setSessionDisplay] = useState("00:00");
+    const [currDiff, setCurrDiff] = useState(100);
+    const [maxDiff, setMaxDiff] = useState(100);
 
     // SEC: handlers
     const handleCountdownStateChange: ToggleButtonGroupProps["onChange"] = (
@@ -49,9 +51,9 @@ export default function Countdown() {
     useEffect(() => {
         const retrieveLatestSession = async () => {
             const latestSession = await getLatestSession(currentProject?.id);
-            const diff = getDiff(latestSession?.stop);
             setCurrentSession(latestSession);
 
+            const diff = getDiff(new Date(), latestSession?.stop);
             // Retrieved session is overdue, end it
             if (diff < 0 && latestSession) {
                 await patchEndSession(latestSession.id);
@@ -78,7 +80,9 @@ export default function Countdown() {
                                 : null,
                         },
                     );
-                    const diff = getDiff(newSession.stop);
+                    const diff = getDiff(new Date(), newSession.stop);
+                    setMaxDiff(getDiff(newSession.start, newSession.stop));
+                    setCurrDiff(diff);
                     const display = getTimeDisplay(diff, TimeUnit.MS);
                     setSessionDisplay(display);
                     setCurrentSession(newSession);
@@ -100,7 +104,9 @@ export default function Countdown() {
             interval = setInterval(() => {
                 const { stop: stopTime } = currentSession;
 
-                const diff = getDiff(stopTime);
+                const diff = getDiff(new Date(), stopTime);
+                setCurrDiff(diff);
+                setMaxDiff(getDiff(currentSession.start, currentSession.stop));
                 const display = getTimeDisplay(diff, TimeUnit.MS);
                 setSessionDisplay(display);
             }, 800);
@@ -122,8 +128,8 @@ export default function Countdown() {
             }}
         >
             <Gauge
-                value={25}
-                valueMax={100}
+                value={currDiff}
+                valueMax={maxDiff}
                 height={300}
                 width={300}
                 startAngle={0}

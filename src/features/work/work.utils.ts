@@ -14,12 +14,16 @@ export const minToTime = (minutes: number | undefined): string => {
     }
 };
 
-export const getDiff = (stopTime: Date | string | undefined | null): number => {
-    if (!stopTime) return -1;
+export const getDiff = (
+    startTime: Date | string | undefined | null,
+    stopTime: Date | string | undefined | null,
+): number => {
+    if (!stopTime) stopTime = new Date();
+    if (!startTime) startTime = new Date();
 
-    const now = new Date();
     const stop = new Date(stopTime);
-    const diff = stop.getTime() - now.getTime();
+    const start = new Date(startTime);
+    const diff = stop.getTime() - start.getTime();
 
     return diff;
 };
