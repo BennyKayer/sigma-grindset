@@ -14,26 +14,65 @@ export const minToTime = (minutes: number | undefined): string => {
     }
 };
 
-export const getDiff = (stopTime: Date) => {
+export const getDiff = (stopTime: Date | string | undefined | null): number => {
+    if (!stopTime) return -1;
+
     const now = new Date();
     const stop = new Date(stopTime);
     const diff = stop.getTime() - now.getTime();
 
-    if (diff > 0) {
-        const hours = Math.floor(diff / 1000 / 60 / 60);
-        const minutes = Math.floor(diff / 1000 / 60) % 60;
-        const seconds = Math.floor(diff / 1000) % 60;
+    return diff;
+};
 
-        const secondsString = seconds.toString().padStart(2, "0");
-        const minutesString = minutes.toString().padStart(2, "0");
-        const hoursString = hours.toString().padStart(2, "0");
+export enum TimeUnit {
+    MS,
+    SECS,
+    MIN,
+}
+export const getNormalizedParts = (
+    time: number | undefined | null,
+    unit: TimeUnit,
+) => {
+    let hours = 0,
+        minutes = 0,
+        seconds = 0;
 
-        if (hours) {
-            return `${hoursString}:${minutesString}:${secondsString}`;
-        } else {
-            return `${minutesString}:${secondsString}`;
-        }
-    } else {
-        return "00:00";
+    if (!time) {
+        return { hours, minutes, seconds };
     }
+
+    switch (unit) {
+        case TimeUnit.MS:
+            hours = Math.floor(time / 1000 / 60 / 60);
+            minutes = Math.floor(time / 1000 / 60) % 60;
+            seconds = Math.floor(time / 1000) % 60;
+            break;
+        case TimeUnit.SECS:
+            hours = Math.floor(time / 60 / 60);
+            minutes = Math.floor(time / 60) % 60;
+            seconds = time % 60;
+            break;
+        case TimeUnit.MIN:
+            hours = Math.floor(time / 60);
+            minutes = time % 60;
+            break;
+        default:
+            break;
+    }
+    return { hours, minutes, seconds };
+};
+
+export const getTimeDisplay = (
+    time: number | undefined | null,
+    unit: TimeUnit,
+) => {
+    const { hours, minutes, seconds } = getNormalizedParts(time, unit);
+    const secondsString = seconds.toString().padStart(2, "0");
+    const minutesString = minutes.toString().padStart(2, "0");
+    const hoursString = hours.toString().padStart(2, "0");
+
+    if (hours) {
+        return `${hoursString}:${minutesString}:${secondsString}`;
+    }
+    return `${minutesString}:${secondsString}`;
 };

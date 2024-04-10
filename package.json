@@ -6,7 +6,8 @@
         "dev": "ngrok http --domain=hot-enabling-muskox.ngrok-free.app 3000 & next dev",
         "build": "next build",
         "start": "next start",
-        "lint": "next lint"
+        "lint": "next lint",
+        "test": "vitest"
     },
     "dependencies": {
         "@clerk/nextjs": "^4.29.9",
@@ -27,13 +28,17 @@
         "zod": "^3.22.4"
     },
     "devDependencies": {
+        "@testing-library/react": "^14.3.0",
         "@types/node": "^20.11.30",
         "@types/react": "^18.2.73",
         "@types/react-dom": "^18.2.22",
+        "@vitejs/plugin-react": "^4.2.1",
         "eslint": "^8.57.0",
         "eslint-config-next": "^14.1.4",
+        "jsdom": "^24.0.0",
         "prettier": "^3.2.5",
         "prisma": "^5.11.0",
-        "typescript": "^5.4.3"
+        "typescript": "^5.4.3",
+        "vitest": "^1.4.0"
     }
 }

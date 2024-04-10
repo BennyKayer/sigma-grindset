@@ -8,12 +8,18 @@ import {
 } from "@mui/material";
 import { Gauge } from "@mui/x-charts/Gauge";
 import { useEffect, useState, useContext } from "react";
-import { WorkContext, getDiff, minToTime } from "@/features/work";
+import {
+    WorkContext,
+    getDiff,
+    getTimeDisplay,
+    TimeUnit,
+} from "@/features/work";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import StopIcon from "@mui/icons-material/Stop";
 import { createNewSession, getLatestSession } from "@/services/projects";
 import { Session } from "@prisma/client";
+import { patchEndSession } from "../../../services/session";
 
 enum CountdownState {
     STOPPED = "STOPPED",
@@ -43,7 +49,14 @@ export default function Countdown() {
     useEffect(() => {
         const retrieveLatestSession = async () => {
             const latestSession = await getLatestSession(currentProject?.id);
+            const diff = getDiff(latestSession?.stop);
             setCurrentSession(latestSession);
+
+            // Retrieved session is overdue, end it
+            if (diff < 0 && latestSession) {
+                await patchEndSession(latestSession.id);
+                setCurrentSession(null);
+            }
         };
         if (currentProject?.id) {
             retrieveLatestSession();
@@ -65,7 +78,8 @@ export default function Countdown() {
                                 : null,
                         },
                     );
-                    const display = getDiff(newSession.stop);
+                    const diff = getDiff(newSession.stop);
+                    const display = getTimeDisplay(diff, TimeUnit.MS);
                     setSessionDisplay(display);
                     setCurrentSession(newSession);
                     break;
@@ -86,7 +100,8 @@ export default function Countdown() {
             interval = setInterval(() => {
                 const { stop: stopTime } = currentSession;
 
-                const display = getDiff(stopTime);
+                const diff = getDiff(stopTime);
+                const display = getTimeDisplay(diff, TimeUnit.MS);
                 setSessionDisplay(display);
             }, 800);
         } else {
@@ -116,7 +131,7 @@ export default function Countdown() {
                 text={() => {
                     return countdownState === CountdownState.STARTED
                         ? sessionDisplay
-                        : `${minToTime(currentCountdown?.sessionTime)}`;
+                        : `${getTimeDisplay(currentCountdown?.sessionTime, TimeUnit.MIN)}`;
                 }}
             />
             <ToggleButtonGroup onChange={handleCountdownStateChange}>
