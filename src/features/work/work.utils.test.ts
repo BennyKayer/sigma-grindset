@@ -11,7 +11,7 @@ describe("getDiff", () => {
     test("test pomodoro", () => {
         const start = new Date();
         const stop = addMinute(new Date(), 25);
-        const diff = getDiff(start, stop);
+        const diff = getDiff(start, stop, TimeUnit.MS);
         // Round to the nearest second to avoid insignificant ms differences
         const roundedDiff = Math.round(diff / 100000) * 100000;
         expect(roundedDiff).eq(25 * 60 * 1000);

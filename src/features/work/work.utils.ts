@@ -1,22 +1,7 @@
-// TODO: DRY, tests, single responsibility
-export const minToTime = (minutes: number | undefined): string => {
-    if (!minutes) return "00:00";
-
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-
-    const minutesString = remainingMinutes.toString().padStart(2, "0");
-    if (hours) {
-        const hoursString = hours.toString().padStart(2, "0");
-        return `${hoursString}:${minutesString}:00`;
-    } else {
-        return `${minutesString}:00`;
-    }
-};
-
 export const getDiff = (
     startTime: Date | string | undefined | null,
     stopTime: Date | string | undefined | null,
+    as: TimeUnit,
 ): number => {
     if (!stopTime) stopTime = new Date();
     if (!startTime) startTime = new Date();
@@ -25,7 +10,15 @@ export const getDiff = (
     const start = new Date(startTime);
     const diff = stop.getTime() - start.getTime();
 
-    return diff;
+    switch (as) {
+        case TimeUnit.MIN:
+            return Math.floor(diff / 1000 / 60);
+        case TimeUnit.SECS:
+            return Math.floor(diff / 1000);
+        case TimeUnit.MS:
+        default:
+            return diff;
+    }
 };
 
 export enum TimeUnit {
