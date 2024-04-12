@@ -49,14 +49,14 @@ model Countdown {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  name        String
-  description String? @db.Text
+  name              String
+  description       String? @db.Text
   // All times in minutes
-  sessionTime Int
-  shortBrake  Int
-  longBrake   Int?
+  sessionTime       Int
+  shortBrake        Int
+  longBrake         Int?
   longBrakeInterval Int?
-  overtime    Int
+  overtime          Int
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
@@ -76,6 +76,7 @@ model Session {
   isPaused           Boolean  @default(false)
   isStopwatch        Boolean  @default(false)
   isOnGoing          Boolean  @default(true)
+  isBreak            Boolean  @default(false)
 
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId String

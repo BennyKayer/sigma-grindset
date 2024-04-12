@@ -19,7 +19,7 @@ import PauseIcon from "@mui/icons-material/Pause";
 import StopIcon from "@mui/icons-material/Stop";
 import { createNewSession, getLatestSession } from "@/services/projects";
 import { Session } from "@prisma/client";
-import { patchEndSession, patchPauseSession } from "@/services/session";
+import { SessionPatchTypes, patchSession } from "@/services/session";
 
 enum CountdownState {
     STOPPED = "STOPPED",
@@ -69,21 +69,17 @@ export default function Countdown() {
             switch (state) {
                 case CountdownState.STARTED:
                     if (currentSession?.isPaused && currentCountdown) {
-                        const unpaused = await patchPauseSession(
+                        const unpaused = await patchSession(
                             currentSession?.id,
-                            false,
-                            currentCountdown.sessionTime,
+                            SessionPatchTypes.resume,
                         );
                         handleDisplayUpdate(unpaused);
                         setCurrentSession(unpaused);
                     } else {
                         const newSession = await createNewSession(
                             currentProject?.id,
-                            {
-                                sessionTime: currentCountdown
-                                    ? currentCountdown.sessionTime
-                                    : null,
-                            },
+                            currentCountdown?.sessionTime,
+                            false,
                         );
                         handleDisplayUpdate(newSession);
                         setCurrentSession(newSession);
@@ -91,18 +87,27 @@ export default function Countdown() {
                     break;
                 case CountdownState.PAUSED:
                     if (currentSession && currentCountdown) {
-                        const paused = await patchPauseSession(
+                        const paused = await patchSession(
                             currentSession.id,
-                            true,
-                            currentCountdown.sessionTime,
+                            SessionPatchTypes.pause,
+                            { sessionTime: currentCountdown.sessionTime },
                         );
                         handleDisplayUpdate(paused);
                         setCurrentSession(paused);
                     }
                     break;
                 case CountdownState.STOPPED:
-                    if (currentSession) {
-                        await patchEndSession(currentSession.id);
+                    if (currentSession && currentCountdown) {
+                        const { isBreak } = currentSession;
+                        const { longBrake, longBrakeInterval, shortBrake } =
+                            currentCountdown;
+                        await patchSession(
+                            currentSession.id,
+                            isBreak
+                                ? SessionPatchTypes.endBreak
+                                : SessionPatchTypes.endSession,
+                            { shortBrake, longBrake, longBrakeInterval },
+                        );
                         setCurrentSession(null);
                         handleDisplayUpdate(null);
                     }
@@ -126,11 +131,24 @@ export default function Countdown() {
         const retrieveLatestSession = async () => {
             const latestSession = await getLatestSession(currentProject?.id);
             setCurrentSession(latestSession);
+            if (latestSession?.isOnGoing) {
+                setCountdownState(CountdownState.STARTED);
+            }
+            if (latestSession?.isPaused) {
+                setCountdownState(CountdownState.PAUSED);
+            }
 
             const diff = getDiff(new Date(), latestSession?.stop, TimeUnit.MS);
             // Retrieved session is overdue, end it
             if (diff < 0 && latestSession) {
-                await patchEndSession(latestSession.id);
+                const { id, isBreak } = latestSession;
+                await patchSession(
+                    id,
+                    isBreak
+                        ? SessionPatchTypes.endBreak
+                        : SessionPatchTypes.endSession,
+                    { ...currentCountdown },
+                );
                 setCurrentSession(null);
             }
         };
@@ -146,7 +164,7 @@ export default function Countdown() {
         if (currentSession) {
             interval = setInterval(() => {
                 handleDisplayUpdate(currentSession);
-            }, 800);
+            }, 400);
 
             const { isPaused, isOnGoing } = currentSession;
             if (isPaused || !isOnGoing) {

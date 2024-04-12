@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/utils/db";
 import { toBoolean } from "@/utils/types";
 import { addMinute } from "@formkit/tempo";
-import { NewSessionBody } from "@/services/projects";
+import { z } from "zod";
 
 type Params = {
     params: {
@@ -35,11 +35,15 @@ export const GET = async (req: NextRequest, params: Params) => {
     return NextResponse.json({ data: projectSessions });
 };
 
+const NewSessionBody = z.object({
+    sessionTime: z.number().optional(),
+    isBreak: z.boolean(),
+});
 export const POST = async (req: NextRequest, params: Params) => {
     const {
         params: { id: projectId },
     } = params;
-    const { sessionTime } = (await req.json()) as NewSessionBody;
+    const { sessionTime, isBreak } = NewSessionBody.parse(await req.json());
 
     const start = new Date();
     const newSession = await prisma.session.create({
@@ -48,6 +52,7 @@ export const POST = async (req: NextRequest, params: Params) => {
             start,
             stop: sessionTime ? addMinute(start, sessionTime) : start,
             isStopwatch: sessionTime ? false : true,
+            isBreak,
         },
     });
 

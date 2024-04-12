@@ -73,16 +73,17 @@ export const getLatestSession = async (projectId: string | undefined) => {
     return data as Session | null;
 };
 
-export type NewSessionBody = {
-    sessionTime: Countdown["sessionTime"] | null;
-};
 export const createNewSession = async (
     projectId: string | undefined,
-    body: NewSessionBody,
+    sessionTime: number | undefined,
+    isBreak: boolean,
 ) => {
     const init: RequestInit = {
         method: "POST",
-        body: JSON.stringify(body),
+        body: JSON.stringify({
+            sessionTime,
+            isBreak,
+        }),
     };
     const url = new URL(`${ENDPOINT}/${projectId}/session`);
 
@@ -90,8 +91,7 @@ export const createNewSession = async (
     const res = await fetch(req);
 
     if (!res.ok) {
-        console.log(res);
-
+        console.error(res);
         throw new Error("Failed to create a session");
     }
     const { data } = await res.json();
