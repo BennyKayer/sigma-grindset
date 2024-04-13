@@ -53,9 +53,9 @@ model Countdown {
   description       String? @db.Text
   // All times in minutes
   sessionTime       Int
-  shortBrake        Int
-  longBrake         Int?
-  longBrakeInterval Int?
+  shortBreak        Int
+  longBreak         Int?
+  longBreakInterval Int?
   overtime          Int
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)

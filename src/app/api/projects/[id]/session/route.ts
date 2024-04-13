@@ -18,11 +18,14 @@ export const GET = async (req: NextRequest, params: Params) => {
     const shouldGetLatest = toBoolean(searchParams.get("latest"));
 
     if (shouldGetLatest) {
-        const latest = await prisma.session.findFirst({
+        const latest = await prisma.session.findMany({
             where: {
                 projectId,
-                isOnGoing: true,
             },
+            orderBy: {
+                updatedAt: "desc",
+            },
+            take: 1,
         });
         return NextResponse.json({ data: latest });
     }

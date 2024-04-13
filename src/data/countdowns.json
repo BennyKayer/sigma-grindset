@@ -3,25 +3,25 @@
         "name": "Pomodoro",
         "description": "Pomodoro Technique: The Pomodoro Technique is a popular time management method that encourages focused work sessions interspersed with short breaks. Here’s how it works: \nPomodoro Technique: The Pomodoro Technique is a popular time management method that encourages focused work sessions interspersed with short breaks. Here’s how it works:\nConcentrate on a single task during this time.\nWhen the timer rings, take a 5-minute break\nAfter completing four pomodoros, reward yourself with a longer 15-30 minute break.\nThe technique helps maintain sustained concentration and prevents mental fatigue. It’s like thinking in tomatoes (or “pomodori” in Italian) instead of hours!",
         "sessionTime": 25,
-        "shortBrake": 5,
+        "shortBreak": 5,
         "overtime": 5,
-        "longBrake": 15,
-        "longBrakeInterval": 5
+        "longBreak": 15,
+        "longBreakInterval": 5
     },
     {
         "name": "Circadian Rhythm",
         "description": "The Circadian Rhythm is a natural biological pattern that repeats approximately every 24 hours. It regulates various physiological and behavioral processes in your body, including sleep-wake cycles, hormone production, and metabolism.\nWork intensely for 90 minutes (equivalent to one sleep cycle).\nAfter this focused work period, take a 20-minute break (similar to a power nap).\nThe idea is to align your work sessions with your body’s natural energy peaks and troughs, optimizing productivity and preventing burnout.",
         "sessionTime": 90,
-        "shortBrake": 20,
+        "shortBreak": 20,
         "overtime": 5
     },
     {
         "name": "5-Minute Rule",
         "description": "The 5-Minute Rule is a productivity method that tricks your brain into action:\nTell yourself you only need to work for 5 minutes on a task.\nOften, you’ll end up working longer because you get into a productive zone.\nIt’s a great way to overcome procrastination and build habits.\nFor instance, read just a few pages or write a short introduction, and watch how it leads to more focused work",
         "sessionTime": 5,
-        "shortBrake": 5,
+        "shortBreak": 5,
         "overtime": 5,
-        "longBrake": 15,
-        "longBrakeInterval": 5
+        "longBreak": 15,
+        "longBreakInterval": 5
     }
 ]

@@ -38,17 +38,25 @@ export default function Countdown() {
     const [maxDiff, setMaxDiff] = useState(100);
 
     // SEC: handlers
-    const handleDisplayUpdate = (session: Session | null) => {
+    const handleSessionUpdate = (session: Session | null) => {
+        setCurrentSession(session);
         // Stop clicked => reset
         if (!session) {
-            setMaxDiff(100);
-            setCurrDiff(100);
+            setCountdownState(CountdownState.STOPPED);
             const resetDisplay = getTimeDisplay(
                 currentCountdown?.sessionTime,
                 TimeUnit.MIN,
             );
             setSessionDisplay(resetDisplay);
+            setCurrDiff(100);
+            setMaxDiff(100);
             return;
+        }
+        const { isPaused, isOnGoing } = session;
+        if (isPaused) {
+            setCountdownState(CountdownState.PAUSED);
+        } else if (isOnGoing) {
+            setCountdownState(CountdownState.STARTED);
         }
 
         const sessionMax = getDiff(session.start, session.stop, TimeUnit.SECS);
@@ -73,16 +81,14 @@ export default function Countdown() {
                             currentSession?.id,
                             SessionPatchTypes.resume,
                         );
-                        handleDisplayUpdate(unpaused);
-                        setCurrentSession(unpaused);
+                        handleSessionUpdate(unpaused);
                     } else {
                         const newSession = await createNewSession(
                             currentProject?.id,
                             currentCountdown?.sessionTime,
-                            false,
+                            !!currentSession?.isBreak,
                         );
-                        handleDisplayUpdate(newSession);
-                        setCurrentSession(newSession);
+                        handleSessionUpdate(newSession);
                     }
                     break;
                 case CountdownState.PAUSED:
@@ -92,24 +98,32 @@ export default function Countdown() {
                             SessionPatchTypes.pause,
                             { sessionTime: currentCountdown.sessionTime },
                         );
-                        handleDisplayUpdate(paused);
-                        setCurrentSession(paused);
+                        handleSessionUpdate(paused);
                     }
                     break;
                 case CountdownState.STOPPED:
                     if (currentSession && currentCountdown) {
                         const { isBreak } = currentSession;
-                        const { longBrake, longBrakeInterval, shortBrake } =
+                        const { longBreak, longBreakInterval, shortBreak } =
                             currentCountdown;
-                        await patchSession(
-                            currentSession.id,
-                            isBreak
-                                ? SessionPatchTypes.endBreak
-                                : SessionPatchTypes.endSession,
-                            { shortBrake, longBrake, longBrakeInterval },
-                        );
-                        setCurrentSession(null);
-                        handleDisplayUpdate(null);
+
+                        if (isBreak) {
+                            const newSession = await patchSession(
+                                currentSession.id,
+                                SessionPatchTypes.endBreak,
+                                { shortBreak, longBreak, longBreakInterval },
+                            );
+                            handleSessionUpdate(newSession);
+                        } else {
+                            const sessionBreak = await patchSession(
+                                currentSession.id,
+                                SessionPatchTypes.endSession,
+                                { shortBreak, longBreak, longBreakInterval },
+                            );
+                            handleSessionUpdate(sessionBreak);
+                        }
+
+                        handleSessionUpdate(null);
                     }
                     break;
                 default:
@@ -118,6 +132,7 @@ export default function Countdown() {
         };
 
     // SEC: useEffect
+    // Handle countdown change
     useEffect(() => {
         if (currentCountdown) {
             setSessionDisplay(
@@ -129,33 +144,36 @@ export default function Countdown() {
     // Retrieve session
     useEffect(() => {
         const retrieveLatestSession = async () => {
-            const latestSession = await getLatestSession(currentProject?.id);
-            setCurrentSession(latestSession);
-            if (latestSession?.isOnGoing) {
-                setCountdownState(CountdownState.STARTED);
-            }
-            if (latestSession?.isPaused) {
-                setCountdownState(CountdownState.PAUSED);
-            }
+            if (currentProject && currentCountdown) {
+                const latestSession = await getLatestSession(currentProject.id);
 
-            const diff = getDiff(new Date(), latestSession?.stop, TimeUnit.MS);
-            // Retrieved session is overdue, end it
-            if (diff < 0 && latestSession) {
-                const { id, isBreak } = latestSession;
-                await patchSession(
-                    id,
-                    isBreak
-                        ? SessionPatchTypes.endBreak
-                        : SessionPatchTypes.endSession,
-                    { ...currentCountdown },
-                );
-                setCurrentSession(null);
+                // No session retrieved -> do nothing
+                if (!latestSession) return;
+                handleSessionUpdate(latestSession);
+
+                const { isBreak, stop, id } = latestSession;
+                const now = new Date();
+                const diff = getDiff(now, stop, TimeUnit.MS);
+
+                // Retrieved session is overdue, end it and set to break
+                if (diff < 0 && !isBreak) {
+                    const { longBreak, longBreakInterval, shortBreak } =
+                        currentCountdown;
+                    const sessionBreak = await patchSession(
+                        id,
+                        SessionPatchTypes.endSession,
+                        {
+                            longBreak,
+                            longBreakInterval,
+                            shortBreak,
+                        },
+                    );
+                    handleSessionUpdate(sessionBreak);
+                }
             }
         };
-        if (currentProject?.id) {
-            retrieveLatestSession();
-        }
-    }, [currentProject]);
+        retrieveLatestSession();
+    }, [currentProject, currentCountdown]);
 
     // Manage session changes
     useEffect(() => {
@@ -163,7 +181,7 @@ export default function Countdown() {
 
         if (currentSession) {
             interval = setInterval(() => {
-                handleDisplayUpdate(currentSession);
+                handleSessionUpdate(currentSession);
             }, 400);
 
             const { isPaused, isOnGoing } = currentSession;

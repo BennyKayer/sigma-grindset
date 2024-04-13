@@ -12,9 +12,9 @@ type Params = {
 };
 
 const EndSessionSchema = z.object({
-    shortBrake: z.number(),
-    longBrake: z.number().nullable(),
-    longBrakeInterval: z.number().nullable(),
+    shortBreak: z.number(),
+    longBreak: z.number().nullable(),
+    longBreakInterval: z.number().nullable(),
 });
 
 const SharedPatchSchema = z.object({
@@ -32,7 +32,7 @@ export const PATCH = async (req: NextRequest, params: Params) => {
 
     switch (type) {
         case SessionPatchTypes.endSession: {
-            const { longBrake, longBrakeInterval, shortBrake } =
+            const { longBreak, longBreakInterval, shortBreak } =
                 EndSessionSchema.parse(data);
 
             // First stop the session and retrieve its project's id
@@ -44,11 +44,11 @@ export const PATCH = async (req: NextRequest, params: Params) => {
             });
             const { projectId } = stopped;
 
-            // If the countdown doesn't have longBrake
+            // If the countdown doesn't have longBreak
             // start the short one and skip the sessions count
-            if (!longBrake || !longBrakeInterval) {
-                const shortBrakeSession = createBreak(shortBrake, projectId);
-                return NextResponse.json({ data: shortBrakeSession });
+            if (!longBreak || !longBreakInterval) {
+                const shortBreakSession = createBreak(shortBreak, projectId);
+                return NextResponse.json({ data: shortBreakSession });
             }
 
             // Find the sessions from today
@@ -65,12 +65,12 @@ export const PATCH = async (req: NextRequest, params: Params) => {
             });
 
             // Decide on short or long brake
-            if (sessionsToday % longBrakeInterval === 0) {
-                const longBreakSession = createBreak(longBrake, projectId);
+            if (sessionsToday % longBreakInterval === 0) {
+                const longBreakSession = createBreak(longBreak, projectId);
                 return NextResponse.json({ data: longBreakSession });
             } else {
-                const shortBrakeSession = createBreak(shortBrake, projectId);
-                return NextResponse.json({ data: shortBrakeSession });
+                const shortBreakSession = createBreak(shortBreak, projectId);
+                return NextResponse.json({ data: shortBreakSession });
             }
         }
         case SessionPatchTypes.pause: {
@@ -136,6 +136,9 @@ export const PATCH = async (req: NextRequest, params: Params) => {
             });
 
             return NextResponse.json({ data: unpausedSession });
+        }
+        case SessionPatchTypes.endBreak: {
+            // TODO:
         }
         default: {
             const updated = await prisma.session.update({

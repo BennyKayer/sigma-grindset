@@ -70,7 +70,12 @@ export const getLatestSession = async (projectId: string | undefined) => {
         throw new Error("Failed to get latest session");
     }
     const { data } = await res.json();
-    return data as Session | null;
+    if (data.length) {
+        const [latestSession] = data;
+        return latestSession as Session;
+    } else {
+        return null;
+    }
 };
 
 export const createNewSession = async (
