@@ -44,34 +44,7 @@ export const PATCH = async (req: NextRequest, params: Params) => {
             });
             const { projectId } = stopped;
 
-            // If the countdown doesn't have longBreak
-            // start the short one and skip the sessions count
-            if (!longBreak || !longBreakInterval) {
-                const shortBreakSession = createBreak(shortBreak, projectId);
-                return NextResponse.json({ data: shortBreakSession });
-            }
-
-            // Find the sessions from today
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const sessionsToday = await prisma.session.count({
-                where: {
-                    projectId,
-                    updatedAt: {
-                        gte: today,
-                    },
-                    isBreak: false,
-                },
-            });
-
-            // Decide on short or long brake
-            if (sessionsToday % longBreakInterval === 0) {
-                const longBreakSession = createBreak(longBreak, projectId);
-                return NextResponse.json({ data: longBreakSession });
-            } else {
-                const shortBreakSession = createBreak(shortBreak, projectId);
-                return NextResponse.json({ data: shortBreakSession });
-            }
+            // TODO: Better end
         }
         case SessionPatchTypes.pause: {
             const unpausedSession = await prisma.session.findUniqueOrThrow({
