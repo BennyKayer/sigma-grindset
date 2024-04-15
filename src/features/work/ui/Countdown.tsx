@@ -19,8 +19,7 @@ import PauseIcon from "@mui/icons-material/Pause";
 import StopIcon from "@mui/icons-material/Stop";
 import { createNewSession, getLatestSession } from "@/services/projects";
 import { Session } from "@prisma/client";
-import { SessionPatchTypes, patchSession } from "@/services/session";
-import { createBreak } from "../../../utils/db";
+import { endSession, pauseSession, resumeSession } from "@/services/session";
 
 enum CountdownState {
     STOPPED = "STOPPED",
@@ -40,16 +39,22 @@ export default function Countdown() {
     const [isBreak, setIsBreak] = useState(false);
 
     // SEC: handlers
-    const handleSessionUpdate = (
-        session: Session | null,
-        breakTime?: number | null,
-    ) => {
+    const handleResetCountdown = (session: null | number) => {
+        setCountdownState(CountdownState.STOPPED);
+        setCurrentSession(null);
+        const display = getTimeDisplay(session, TimeUnit.MIN);
+        setSessionDisplay(display);
+        setCurrDiff(100);
+        setMaxDiff(100);
+    };
+
+    const handleSessionUpdate = (session: Session | null) => {
         // Stop clicked => reset
         if (!session) {
             setCurrentSession(null);
             setCountdownState(CountdownState.STOPPED);
             const resetDisplay = getTimeDisplay(
-                breakTime ? breakTime : currentCountdown?.sessionTime,
+                currentCountdown?.sessionTime,
                 TimeUnit.MIN,
             );
             setSessionDisplay(resetDisplay);
@@ -85,60 +90,34 @@ export default function Countdown() {
             switch (state) {
                 case CountdownState.STARTED:
                     if (currentSession?.isPaused && currentCountdown) {
-                        const unpaused = await patchSession(
-                            currentSession?.id,
-                            SessionPatchTypes.resume,
-                        );
+                        const unpaused = await resumeSession(currentSession.id);
                         handleSessionUpdate(unpaused);
                     } else {
-                        if (isBreak) {
-                            const newBreak = await createBreak(
-                                currentCountdown?.id,
-                                currentProject?.id,
-                            );
-                            handleSessionUpdate(newBreak);
-                        } else {
-                            const newSession = await createNewSession(
-                                currentProject?.id,
-                                currentCountdown?.sessionTime,
-                            );
-                            handleSessionUpdate(newSession);
-                        }
+                        const newSession = await createNewSession(
+                            currentProject?.id,
+                            currentCountdown?.id,
+                            isBreak,
+                        );
+                        handleSessionUpdate(newSession);
                     }
                     break;
                 case CountdownState.PAUSED:
                     if (currentSession && currentCountdown) {
-                        const paused = await patchSession(
+                        const paused = await pauseSession(
                             currentSession.id,
-                            SessionPatchTypes.pause,
-                            { sessionTime: currentCountdown.sessionTime },
+                            currentCountdown.id,
                         );
                         handleSessionUpdate(paused);
                     }
                     break;
                 case CountdownState.STOPPED:
-                    if (currentSession && currentCountdown) {
-                        const { isBreak } = currentSession;
-                        const { longBreak, longBreakInterval, shortBreak } =
-                            currentCountdown;
-
-                        if (isBreak) {
-                            const newSession = await patchSession(
-                                currentSession.id,
-                                SessionPatchTypes.endBreak,
-                                { shortBreak, longBreak, longBreakInterval },
-                            );
-                            handleSessionUpdate(newSession);
-                        } else {
-                            const sessionBreak = await patchSession(
-                                currentSession.id,
-                                SessionPatchTypes.endSession,
-                                { shortBreak, longBreak, longBreakInterval },
-                            );
-                            handleSessionUpdate(sessionBreak);
-                        }
-
-                        handleSessionUpdate(null);
+                    if (currentSession && currentCountdown && currentProject) {
+                        const endedSession = await endSession(
+                            currentSession.id,
+                            currentCountdown.id,
+                            currentProject.id,
+                        );
+                        handleResetCountdown(endedSession);
                     }
                     break;
                 default:
@@ -159,24 +138,27 @@ export default function Countdown() {
     // Retrieve session
     useEffect(() => {
         const retrieveLatestSession = async () => {
-            if (currentProject) {
+            if (currentProject && currentCountdown) {
                 const latestSession = await getLatestSession(
                     currentProject.id,
-                    currentCountdown?.id,
+                    currentCountdown.id,
                 );
                 // No session retrieved -> do nothing
                 if (!latestSession) return;
 
                 // Break time retrieved -> set timer to break
                 if (typeof latestSession === "number") {
-                    handleSessionUpdate(null, latestSession);
+                    handleResetCountdown(latestSession);
+                    setIsBreak(true);
                     return;
+                } else {
+                    handleSessionUpdate(latestSession);
+                    setIsBreak(false);
                 }
-                handleSessionUpdate(latestSession);
             }
         };
         retrieveLatestSession();
-    }, [currentProject]);
+    }, [currentProject, currentCountdown]);
 
     // Manage session changes
     useEffect(() => {

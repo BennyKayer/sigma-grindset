@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createBreak, prisma } from "@/utils/db";
+import { getShortOrLongBreak, prisma } from "@/utils/db";
 import { TimeUnit, getDiff } from "@/features/work";
 import { addSecond } from "@formkit/tempo";
 import { z } from "zod";
@@ -12,9 +12,8 @@ type Params = {
 };
 
 const EndSessionSchema = z.object({
-    shortBreak: z.number(),
-    longBreak: z.number().nullable(),
-    longBreakInterval: z.number().nullable(),
+    countdownId: z.string(),
+    projectId: z.string(),
 });
 
 const SharedPatchSchema = z.object({
@@ -32,8 +31,7 @@ export const PATCH = async (req: NextRequest, params: Params) => {
 
     switch (type) {
         case SessionPatchTypes.endSession: {
-            const { longBreak, longBreakInterval, shortBreak } =
-                EndSessionSchema.parse(data);
+            const { countdownId, projectId } = EndSessionSchema.parse(data);
 
             // First stop the session and retrieve its project's id
             const stopped = await prisma.session.update({
@@ -42,9 +40,16 @@ export const PATCH = async (req: NextRequest, params: Params) => {
                     isOnGoing: false,
                 },
             });
-            const { projectId } = stopped;
 
-            // TODO: Better end
+            if (stopped.isBreak) {
+                return NextResponse.json({ data: null });
+            } else {
+                const breakTime = await getShortOrLongBreak(
+                    countdownId,
+                    projectId,
+                );
+                return NextResponse.json({ data: breakTime });
+            }
         }
         case SessionPatchTypes.pause: {
             const unpausedSession = await prisma.session.findUniqueOrThrow({
@@ -109,9 +114,6 @@ export const PATCH = async (req: NextRequest, params: Params) => {
             });
 
             return NextResponse.json({ data: unpausedSession });
-        }
-        case SessionPatchTypes.endBreak: {
-            // TODO:
         }
         default: {
             const updated = await prisma.session.update({

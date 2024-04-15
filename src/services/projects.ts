@@ -79,12 +79,14 @@ export const getLatestSession = async (
 
 export const createNewSession = async (
     projectId: string | undefined,
-    sessionTime: number | undefined,
+    countdownId: string | undefined,
+    isBreak: boolean,
 ) => {
     const init: RequestInit = {
         method: "POST",
         body: JSON.stringify({
-            sessionTime,
+            countdownId,
+            isBreak,
         }),
     };
     const url = new URL(`${ENDPOINT}/${projectId}/session`);

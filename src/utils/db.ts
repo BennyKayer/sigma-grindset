@@ -1,6 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 import { ENVS } from "@/utils/env";
-import { addMinute } from "@formkit/tempo";
 
 // There is this globalThis thing in node
 const globalForPrisma = globalThis as unknown as {
@@ -22,7 +21,7 @@ export const getShortOrLongBreak = async (
     projectId: string | undefined,
 ) => {
     // Break for stopwatch does not exist
-    if (!countdownId) return null;
+    if (!countdownId) return 0;
     const { longBreak, longBreakInterval, shortBreak } =
         await prisma.countdown.findUniqueOrThrow({
             where: { id: countdownId },
@@ -53,25 +52,4 @@ export const getShortOrLongBreak = async (
     } else {
         return shortBreak;
     }
-};
-
-export const createBreak = async (
-    countdownId: string | null | undefined,
-    projectId: string | undefined,
-) => {
-    const breakTime = await getShortOrLongBreak(countdownId, projectId);
-    if (!breakTime) return null;
-    if (!projectId) return null;
-
-    const start = new Date();
-    return await prisma.session.create({
-        data: {
-            start,
-            stop: addMinute(start, breakTime),
-            projectId,
-            isBreak: true,
-            isOnGoing: false,
-            isPaused: true,
-        },
-    });
 };

@@ -8,13 +8,16 @@ export enum SessionPatchTypes {
     pause = "PAUSE",
     resume = "RESUME",
     endSession = "END_SESSION",
-    endBreak = "END_BREAK",
 }
 
+type PatchSessionBody = {
+    countdownId?: string;
+    projectId?: string;
+};
 export const patchSession = async (
     id: string,
     type: SessionPatchTypes,
-    body?: Partial<Countdown>,
+    body?: PatchSessionBody,
 ) => {
     const init: RequestInit = {
         method: "PATCH",
@@ -32,5 +35,29 @@ export const patchSession = async (
         throw new Error("Failed to end the session");
     }
     const { data } = await res.json();
-    return data as Session;
+    return data as Session | number | null;
+};
+
+export const resumeSession = async (id: string) => {
+    const patched = await patchSession(id, SessionPatchTypes.resume);
+    return patched as Session;
+};
+
+export const pauseSession = async (id: string, countdownId: string) => {
+    const patched = await patchSession(id, SessionPatchTypes.pause, {
+        countdownId,
+    });
+    return patched as Session;
+};
+
+export const endSession = async (
+    id: string,
+    countdownId: string,
+    projectId: string,
+) => {
+    const patched = await patchSession(id, SessionPatchTypes.endSession, {
+        countdownId,
+        projectId,
+    });
+    return patched as null | number;
 };

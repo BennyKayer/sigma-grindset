@@ -65,21 +65,32 @@ export const GET = async (req: NextRequest, params: Params) => {
 };
 
 const NewSessionBody = z.object({
-    sessionTime: z.number().optional(),
+    countdownId: z.string(),
+    isBreak: z.boolean(),
 });
 export const POST = async (req: NextRequest, params: Params) => {
     const {
         params: { id: projectId },
     } = params;
-    const { sessionTime } = NewSessionBody.parse(await req.json());
+    const { countdownId, isBreak } = NewSessionBody.parse(await req.json());
 
+    const countdown = await prisma.countdown.findUniqueOrThrow({
+        where: {
+            id: countdownId,
+        },
+    });
     const start = new Date();
+    const timeToAdd = isBreak
+        ? await getShortOrLongBreak(countdownId, projectId)
+        : countdown.sessionTime;
+    const stop = addMinute(start, timeToAdd);
     const newSession = await prisma.session.create({
         data: {
             projectId,
             start,
-            stop: sessionTime ? addMinute(start, sessionTime) : start,
-            isStopwatch: sessionTime ? false : true,
+            stop,
+            isBreak,
+            isOnGoing: true,
         },
     });
 
