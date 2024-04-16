@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma, getShortOrLongBreak } from "@/utils/db";
 import { toBoolean } from "@/utils/types";
-import { addMinute } from "@formkit/tempo";
+import { addMinute, addSecond } from "@formkit/tempo";
 import { z } from "zod";
 import { TimeUnit, getDiff } from "@/features/work";
 
@@ -23,6 +23,9 @@ export const GET = async (req: NextRequest, params: Params) => {
         const latest = await prisma.session.findMany({
             where: {
                 projectId,
+                AND: {
+                    OR: [{ isOnGoing: true }, { isPaused: true }],
+                },
             },
             orderBy: {
                 updatedAt: "desc",
@@ -34,7 +37,7 @@ export const GET = async (req: NextRequest, params: Params) => {
             const diff = getDiff(new Date(), latestSession.stop, TimeUnit.MS);
 
             // Retrieved session is overdue, end it
-            // then award a
+            // then award a break
             if (diff <= 0) {
                 await prisma.session.update({
                     where: {
@@ -50,7 +53,18 @@ export const GET = async (req: NextRequest, params: Params) => {
                 );
                 return NextResponse.json({ data: breakTime });
             }
-            return NextResponse.json({ data: latestSession });
+            // The dates won't be updated on session
+            // need to adjust this for initial display
+            const adjustedSec = getDiff(
+                latestSession.start,
+                latestSession.stop,
+                TimeUnit.SECS,
+            );
+            const start = new Date();
+            const stop = addSecond(start, adjustedSec);
+            return NextResponse.json({
+                data: { ...latestSession, start, stop },
+            });
         } else {
             return NextResponse.json({ data: null });
         }

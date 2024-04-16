@@ -73,7 +73,9 @@ export default function Countdown() {
             setCountdownState(CountdownState.STARTED);
         }
 
-        const sessionMax = getDiff(session.start, session.stop, TimeUnit.SECS);
+        const sessionMax =
+            getDiff(session.start, session.stop, TimeUnit.SECS) +
+            session.accumulatedSeconds;
         setMaxDiff(sessionMax);
 
         const sessionCurrent = getDiff(new Date(), session.stop, TimeUnit.SECS);

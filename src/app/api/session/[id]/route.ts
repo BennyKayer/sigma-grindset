@@ -43,6 +43,7 @@ export const PATCH = async (req: NextRequest, params: Params) => {
                 where: { id },
                 data: {
                     isOnGoing: false,
+                    isPaused: false,
                 },
             });
 
