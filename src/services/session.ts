@@ -43,9 +43,14 @@ export const resumeSession = async (id: string) => {
     return patched as Session;
 };
 
-export const pauseSession = async (id: string, countdownId: string) => {
+export const pauseSession = async (
+    id: string,
+    countdownId: string,
+    projectId: string,
+) => {
     const patched = await patchSession(id, SessionPatchTypes.pause, {
         countdownId,
+        projectId,
     });
     return patched as Session;
 };

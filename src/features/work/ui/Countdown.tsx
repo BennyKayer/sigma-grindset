@@ -42,7 +42,10 @@ export default function Countdown() {
     const handleResetCountdown = (session: null | number) => {
         setCountdownState(CountdownState.STOPPED);
         setCurrentSession(null);
-        const display = getTimeDisplay(session, TimeUnit.MIN);
+        const display = getTimeDisplay(
+            session ? session : currentCountdown?.sessionTime,
+            TimeUnit.MIN,
+        );
         setSessionDisplay(display);
         setCurrDiff(100);
         setMaxDiff(100);
@@ -89,7 +92,7 @@ export default function Countdown() {
 
             switch (state) {
                 case CountdownState.STARTED:
-                    if (currentSession?.isPaused && currentCountdown) {
+                    if (currentSession?.isPaused) {
                         const unpaused = await resumeSession(currentSession.id);
                         handleSessionUpdate(unpaused);
                     } else {
@@ -98,14 +101,16 @@ export default function Countdown() {
                             currentCountdown?.id,
                             isBreak,
                         );
+                        setIsBreak(newSession.isBreak);
                         handleSessionUpdate(newSession);
                     }
                     break;
                 case CountdownState.PAUSED:
-                    if (currentSession && currentCountdown) {
+                    if (currentSession && currentCountdown && currentProject) {
                         const paused = await pauseSession(
                             currentSession.id,
                             currentCountdown.id,
+                            currentProject.id,
                         );
                         handleSessionUpdate(paused);
                     }
@@ -117,6 +122,11 @@ export default function Countdown() {
                             currentCountdown.id,
                             currentProject.id,
                         );
+                        if (typeof endedSession === "number") {
+                            setIsBreak(true);
+                        } else {
+                            setIsBreak(false);
+                        }
                         handleResetCountdown(endedSession);
                     }
                     break;
@@ -164,12 +174,16 @@ export default function Countdown() {
     useEffect(() => {
         let interval: ReturnType<typeof setInterval>;
 
-        if (currentSession) {
-            interval = setInterval(() => {
+        if (currentSession && currentCountdown && currentProject) {
+            interval = setInterval(async () => {
                 const secsLeft = handleSessionUpdate(currentSession);
                 if (secsLeft <= 0) {
-                    const { isBreak } = currentSession;
-                    // TODO: End session
+                    const endedSession = await endSession(
+                        currentSession.id,
+                        currentCountdown.id,
+                        currentProject.id,
+                    );
+                    handleResetCountdown(endedSession);
                     clearInterval(interval);
                 }
             }, 400);
@@ -183,7 +197,7 @@ export default function Countdown() {
         return () => {
             clearInterval(interval);
         };
-    }, [currentSession]);
+    }, [currentSession, currentCountdown, currentProject]);
 
     return (
         <Box

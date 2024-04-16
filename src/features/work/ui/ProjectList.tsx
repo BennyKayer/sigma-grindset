@@ -86,7 +86,6 @@ export default function ProjectList(props: ProjectListProps) {
             }
             return el;
         });
-        console.log(newProjects);
 
         setProjects(newProjects);
     };

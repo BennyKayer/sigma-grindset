@@ -11,6 +11,11 @@ type Params = {
     };
 };
 
+const PauseSessionSchema = z.object({
+    countdownId: z.string(),
+    projectId: z.string(),
+});
+
 const EndSessionSchema = z.object({
     countdownId: z.string(),
     projectId: z.string(),
@@ -52,18 +57,25 @@ export const PATCH = async (req: NextRequest, params: Params) => {
             }
         }
         case SessionPatchTypes.pause: {
+            const { countdownId, projectId } = PauseSessionSchema.parse(data);
+            const countdown = await prisma.countdown.findUniqueOrThrow({
+                where: {
+                    id: countdownId,
+                },
+            });
             const unpausedSession = await prisma.session.findUniqueOrThrow({
                 where: { id },
             });
+
             // Calculate accumulation
             const start = new Date();
             const pauseDiff = getDiff(
                 unpausedSession.start,
                 start,
-                TimeUnit.MIN,
+                TimeUnit.SECS,
             );
-            const accumulatedMinutes =
-                unpausedSession.accumulatedMinutes + pauseDiff;
+            const accumulatedSeconds =
+                unpausedSession.accumulatedSeconds + pauseDiff;
 
             // Calculate remaining session time
             const sessionProgressSec = getDiff(
@@ -71,19 +83,17 @@ export const PATCH = async (req: NextRequest, params: Params) => {
                 start,
                 TimeUnit.SECS,
             );
-            const { sessionTime } = data;
-            if (!sessionTime) {
-                throw Error(`Session time is ${sessionTime}`);
-            }
-            const sessionTimeSec = sessionTime * 60;
-            const leftInSession = sessionTimeSec - sessionProgressSec;
+            const sessionTime = unpausedSession.isBreak
+                ? await getShortOrLongBreak(countdownId, projectId)
+                : countdown.sessionTime;
+            const leftInSession = sessionTime * 60 - sessionProgressSec;
             const stop = addSecond(start, leftInSession);
 
             const pausedSession = await prisma.session.update({
                 where: { id },
                 data: {
                     isPaused: true,
-                    accumulatedMinutes,
+                    accumulatedSeconds,
                     start,
                     stop,
                 },

@@ -71,8 +71,8 @@ model Session {
   start              DateTime
   // Timestamp when it should end, with stopwatch it will be the same as start
   stop               DateTime
-  // When pausing calculate minutes passed and add them here
-  accumulatedMinutes Int      @default(0)
+  // When pausing calculate seconds passed and add them here
+  accumulatedSeconds Int      @default(0)
   isPaused           Boolean  @default(false)
   isStopwatch        Boolean  @default(false)
   isOnGoing          Boolean  @default(true)
