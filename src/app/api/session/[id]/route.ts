@@ -11,16 +11,6 @@ type Params = {
     };
 };
 
-const PauseSessionSchema = z.object({
-    countdownId: z.string(),
-    projectId: z.string(),
-});
-
-const EndSessionSchema = z.object({
-    countdownId: z.string(),
-    projectId: z.string(),
-});
-
 const SharedPatchSchema = z.object({
     type: z
         .nativeEnum(SessionPatchTypes)
@@ -36,8 +26,6 @@ export const PATCH = async (req: NextRequest, params: Params) => {
 
     switch (type) {
         case SessionPatchTypes.endSession: {
-            const { countdownId, projectId } = EndSessionSchema.parse(data);
-
             // First stop the session and retrieve its project's id
             const stopped = await prisma.session.update({
                 where: { id },
@@ -45,28 +33,53 @@ export const PATCH = async (req: NextRequest, params: Params) => {
                     isOnGoing: false,
                     isPaused: false,
                 },
+                include: {
+                    countdown: {
+                        select: {
+                            id: true,
+                        },
+                    },
+                    project: {
+                        select: {
+                            id: true,
+                        },
+                    },
+                },
             });
 
             if (stopped.isBreak) {
                 return NextResponse.json({ data: null });
             } else {
                 const breakTime = await getShortOrLongBreak(
-                    countdownId,
-                    projectId,
+                    stopped.countdownId,
+                    stopped.projectId,
                 );
                 return NextResponse.json({ data: breakTime });
             }
         }
         case SessionPatchTypes.pause: {
-            const { countdownId, projectId } = PauseSessionSchema.parse(data);
-            const countdown = await prisma.countdown.findUniqueOrThrow({
-                where: {
-                    id: countdownId,
-                },
-            });
             const unpausedSession = await prisma.session.findUniqueOrThrow({
                 where: { id },
+                include: {
+                    countdown: {
+                        select: {
+                            id: true,
+                            sessionTime: true,
+                        },
+                    },
+                    project: {
+                        select: {
+                            id: true,
+                        },
+                    },
+                },
             });
+            const { countdownId, projectId, countdown } = unpausedSession;
+
+            if (!countdown) {
+                // TODO: Handle stopwatch
+                return;
+            }
 
             // Calculate accumulation
             const start = new Date();

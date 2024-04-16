@@ -7,22 +7,23 @@ import { TimeUnit, getDiff } from "@/features/work";
 
 type Params = {
     params: {
-        id: string;
+        projectId: string;
+        countdownId: string | undefined;
     };
 };
 
 export const GET = async (req: NextRequest, params: Params) => {
     const {
-        params: { id: projectId },
+        params: { projectId, countdownId },
     } = params;
     const { searchParams } = new URL(req.url);
     const shouldGetLatest = toBoolean(searchParams.get("latest"));
-    const countdownId = searchParams.get("countdownId");
 
     if (shouldGetLatest) {
         const latest = await prisma.session.findMany({
             where: {
                 projectId,
+                countdownId,
                 AND: {
                     OR: [{ isOnGoing: true }, { isPaused: true }],
                 },
@@ -79,20 +80,20 @@ export const GET = async (req: NextRequest, params: Params) => {
 };
 
 const NewSessionBody = z.object({
-    countdownId: z.string(),
     isBreak: z.boolean(),
 });
 export const POST = async (req: NextRequest, params: Params) => {
     const {
-        params: { id: projectId },
+        params: { projectId, countdownId },
     } = params;
-    const { countdownId, isBreak } = NewSessionBody.parse(await req.json());
+    const { isBreak } = NewSessionBody.parse(await req.json());
 
     const countdown = await prisma.countdown.findUniqueOrThrow({
         where: {
             id: countdownId,
         },
     });
+    // TODO: Handle stopwatch
     const start = new Date();
     const timeToAdd = isBreak
         ? await getShortOrLongBreak(countdownId, projectId)
@@ -105,6 +106,7 @@ export const POST = async (req: NextRequest, params: Params) => {
             stop,
             isBreak,
             isOnGoing: true,
+            countdownId,
         },
     });
 

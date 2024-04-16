@@ -1,5 +1,5 @@
 import { ENVS } from "@/utils/env";
-import { Project, Session } from "@prisma/client";
+import { Project } from "@prisma/client";
 
 const ENDPOINT = `${ENVS.apiUrl}/projects`;
 
@@ -53,51 +53,4 @@ export const patchProject = async (name: string, id: string) => {
     }
     const { data } = await res.json();
     return data as Project;
-};
-
-// SEC: Session
-export const getLatestSession = async (
-    projectId: string | undefined,
-    countdownId: string | undefined,
-) => {
-    const init: RequestInit = {
-        method: "GET",
-    };
-    const url = new URL(`${ENDPOINT}/${projectId}/session`);
-    url.searchParams.append("latest", "true");
-    url.searchParams.append("countdownId", `${countdownId}`);
-
-    const req = new Request(url, init);
-    const res = await fetch(req);
-
-    if (!res.ok) {
-        throw new Error("Failed to get latest session");
-    }
-    const { data } = await res.json();
-    return data as Session | null | number;
-};
-
-export const createNewSession = async (
-    projectId: string | undefined,
-    countdownId: string | undefined,
-    isBreak: boolean,
-) => {
-    const init: RequestInit = {
-        method: "POST",
-        body: JSON.stringify({
-            countdownId,
-            isBreak,
-        }),
-    };
-    const url = new URL(`${ENDPOINT}/${projectId}/session`);
-
-    const req = new Request(url, init);
-    const res = await fetch(req);
-
-    if (!res.ok) {
-        console.error(res);
-        throw new Error("Failed to create a session");
-    }
-    const { data } = await res.json();
-    return data as Session;
 };

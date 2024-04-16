@@ -58,8 +58,9 @@ model Countdown {
   longBreakInterval Int?
   overtime          Int
 
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String
+  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId  String
+  session Session[]
 }
 
 model Session {
@@ -78,6 +79,8 @@ model Session {
   isOnGoing          Boolean  @default(true)
   isBreak            Boolean  @default(false)
 
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  projectId String
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId   String
+  countdown   Countdown? @relation(fields: [countdownId], references: [id], onDelete: Cascade)
+  countdownId String?
 }

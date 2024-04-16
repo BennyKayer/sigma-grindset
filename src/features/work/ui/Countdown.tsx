@@ -17,9 +17,14 @@ import {
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import StopIcon from "@mui/icons-material/Stop";
-import { createNewSession, getLatestSession } from "@/services/projects";
 import { Session } from "@prisma/client";
-import { endSession, pauseSession, resumeSession } from "@/services/session";
+import {
+    createNewSession,
+    endSession,
+    getLatestSession,
+    pauseSession,
+    resumeSession,
+} from "@/services/session";
 
 enum CountdownState {
     STOPPED = "STOPPED",
@@ -155,6 +160,7 @@ export default function Countdown() {
                     currentProject.id,
                     currentCountdown.id,
                 );
+
                 // No session retrieved -> do nothing
                 if (!latestSession) return;
 
