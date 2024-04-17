@@ -26,16 +26,16 @@ import {
     resumeSession,
 } from "@/services/session";
 
-enum CountdownState {
+enum TimerState {
     STOPPED = "STOPPED",
     STARTED = "STARTED",
     PAUSED = "PAUSED",
 }
 
-export default function Countdown() {
+export default function Timer() {
     const { currentCountdown, currentProject } = useContext(WorkContext);
-    const [countdownState, setCountdownState] = useState<CountdownState>(
-        CountdownState.STOPPED,
+    const [timerState, setTimerState] = useState<TimerState>(
+        TimerState.STOPPED,
     );
     const [currentSession, setCurrentSession] = useState<Session | null>(null);
     const [sessionDisplay, setSessionDisplay] = useState("00:00");
@@ -44,8 +44,8 @@ export default function Countdown() {
     const [isBreak, setIsBreak] = useState(false);
 
     // SEC: handlers
-    const handleResetCountdown = (session: null | number) => {
-        setCountdownState(CountdownState.STOPPED);
+    const handleResetTimer = (session: null | number) => {
+        setTimerState(TimerState.STOPPED);
         setCurrentSession(null);
         const display = getTimeDisplay(
             session ? session : currentCountdown?.sessionTime,
@@ -60,7 +60,7 @@ export default function Countdown() {
         // Stop clicked => reset
         if (!session) {
             setCurrentSession(null);
-            setCountdownState(CountdownState.STOPPED);
+            setTimerState(TimerState.STOPPED);
             const resetDisplay = getTimeDisplay(
                 currentCountdown?.sessionTime,
                 TimeUnit.MIN,
@@ -73,9 +73,9 @@ export default function Countdown() {
         setCurrentSession(session);
         const { isPaused, isOnGoing } = session;
         if (isPaused) {
-            setCountdownState(CountdownState.PAUSED);
+            setTimerState(TimerState.PAUSED);
         } else if (isOnGoing) {
-            setCountdownState(CountdownState.STARTED);
+            setTimerState(TimerState.STARTED);
         }
 
         const sessionMax =
@@ -92,55 +92,57 @@ export default function Countdown() {
         return sessionCurrent;
     };
 
-    const handleCountdownStateChange: ToggleButtonGroupProps["onChange"] =
-        async (_, value) => {
-            const state = value[0] as CountdownState;
-            setCountdownState(state);
+    const handleTimerStateChange: ToggleButtonGroupProps["onChange"] = async (
+        _,
+        value,
+    ) => {
+        const state = value[0] as TimerState;
+        setTimerState(state);
 
-            switch (state) {
-                case CountdownState.STARTED:
-                    if (currentSession?.isPaused) {
-                        const unpaused = await resumeSession(currentSession.id);
-                        handleSessionUpdate(unpaused);
+        switch (state) {
+            case TimerState.STARTED:
+                if (currentSession?.isPaused) {
+                    const unpaused = await resumeSession(currentSession.id);
+                    handleSessionUpdate(unpaused);
+                } else {
+                    const newSession = await createNewSession(
+                        currentProject?.id,
+                        currentCountdown?.id,
+                        isBreak,
+                    );
+                    setIsBreak(newSession.isBreak);
+                    handleSessionUpdate(newSession);
+                }
+                break;
+            case TimerState.PAUSED:
+                if (currentSession && currentCountdown && currentProject) {
+                    const paused = await pauseSession(
+                        currentSession.id,
+                        currentCountdown.id,
+                        currentProject.id,
+                    );
+                    handleSessionUpdate(paused);
+                }
+                break;
+            case TimerState.STOPPED:
+                if (currentSession && currentCountdown && currentProject) {
+                    const endedSession = await endSession(
+                        currentSession.id,
+                        currentCountdown.id,
+                        currentProject.id,
+                    );
+                    if (typeof endedSession === "number") {
+                        setIsBreak(true);
                     } else {
-                        const newSession = await createNewSession(
-                            currentProject?.id,
-                            currentCountdown?.id,
-                            isBreak,
-                        );
-                        setIsBreak(newSession.isBreak);
-                        handleSessionUpdate(newSession);
+                        setIsBreak(false);
                     }
-                    break;
-                case CountdownState.PAUSED:
-                    if (currentSession && currentCountdown && currentProject) {
-                        const paused = await pauseSession(
-                            currentSession.id,
-                            currentCountdown.id,
-                            currentProject.id,
-                        );
-                        handleSessionUpdate(paused);
-                    }
-                    break;
-                case CountdownState.STOPPED:
-                    if (currentSession && currentCountdown && currentProject) {
-                        const endedSession = await endSession(
-                            currentSession.id,
-                            currentCountdown.id,
-                            currentProject.id,
-                        );
-                        if (typeof endedSession === "number") {
-                            setIsBreak(true);
-                        } else {
-                            setIsBreak(false);
-                        }
-                        handleResetCountdown(endedSession);
-                    }
-                    break;
-                default:
-                    break;
-            }
-        };
+                    handleResetTimer(endedSession);
+                }
+                break;
+            default:
+                break;
+        }
+    };
 
     // SEC: useEffect
     // Handle countdown change
@@ -166,7 +168,7 @@ export default function Countdown() {
 
                 // Break time retrieved -> set timer to break
                 if (typeof latestSession === "number") {
-                    handleResetCountdown(latestSession);
+                    handleResetTimer(latestSession);
                     setIsBreak(true);
                     return;
                 } else {
@@ -191,7 +193,7 @@ export default function Countdown() {
                         currentCountdown.id,
                         currentProject.id,
                     );
-                    handleResetCountdown(endedSession);
+                    handleResetTimer(endedSession);
                     clearInterval(interval);
                 }
             }, 400);
@@ -224,22 +226,22 @@ export default function Countdown() {
                 endAngle={360}
                 text={sessionDisplay}
             />
-            <ToggleButtonGroup onChange={handleCountdownStateChange}>
+            <ToggleButtonGroup onChange={handleTimerStateChange}>
                 <ToggleButton
-                    disabled={countdownState !== CountdownState.STARTED}
-                    value={CountdownState.PAUSED}
+                    disabled={timerState !== TimerState.STARTED}
+                    value={TimerState.PAUSED}
                 >
                     <PauseIcon />
                 </ToggleButton>
                 <ToggleButton
-                    disabled={countdownState === CountdownState.STARTED}
-                    value={CountdownState.STARTED}
+                    disabled={timerState === TimerState.STARTED}
+                    value={TimerState.STARTED}
                 >
                     <PlayArrowIcon />
                 </ToggleButton>
                 <ToggleButton
-                    disabled={countdownState === CountdownState.STOPPED}
-                    value={CountdownState.STOPPED}
+                    disabled={timerState === TimerState.STOPPED}
+                    value={TimerState.STOPPED}
                 >
                     <StopIcon />
                 </ToggleButton>

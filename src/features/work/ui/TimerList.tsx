@@ -15,8 +15,8 @@ import { getUserCountdowns } from "@/services/countdown";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { WorkContext } from "@/features/work";
 
-type CountdownsListProps = {} & BoxProps;
-export default function CountdownsList(props: CountdownsListProps) {
+type TimerListProps = {} & BoxProps;
+export default function TimerList(props: TimerListProps) {
     const [countdowns, setCountdowns] = useState<Countdown[]>([]);
     const { setCurrentCountdown, currentCountdown } = useContext(WorkContext);
 
