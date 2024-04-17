@@ -30,9 +30,6 @@ export default function TimerList(props: TimerListProps) {
         const setupCountdowns = async () => {
             const userCountdowns = await getUserCountdowns();
             setCountdowns(userCountdowns);
-            if (userCountdowns.length) {
-                setCurrentCountdown(userCountdowns[0]);
-            }
         };
         setupCountdowns();
     }, []);

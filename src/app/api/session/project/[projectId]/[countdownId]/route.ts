@@ -67,6 +67,23 @@ export const GET = async (req: NextRequest, params: Params) => {
                 data: { ...latestSession, start, stop },
             });
         } else {
+            // Maybe there's a stopwatch session?
+            const latestStopwatch = await prisma.session.findMany({
+                where: {
+                    projectId,
+                    AND: {
+                        OR: [{ isOnGoing: true }, { isPaused: true }],
+                    },
+                },
+                orderBy: {
+                    updatedAt: "desc",
+                },
+                take: 1,
+            });
+            if (latestStopwatch.length) {
+                return NextResponse.json({ data: latestStopwatch[0] });
+            }
+
             return NextResponse.json({ data: null });
         }
     }
@@ -88,13 +105,27 @@ export const POST = async (req: NextRequest, params: Params) => {
     } = params;
     const { isBreak } = NewSessionBody.parse(await req.json());
 
-    const countdown = await prisma.countdown.findUniqueOrThrow({
+    const countdown = await prisma.countdown.findUnique({
         where: {
             id: countdownId,
         },
     });
-    // TODO: Handle stopwatch
     const start = new Date();
+
+    // Handle stopwatch session
+    if (!countdown) {
+        const newStopwatchSession = await prisma.session.create({
+            data: {
+                projectId,
+                start,
+                stop: start,
+                isOnGoing: true,
+                isStopwatch: true,
+            },
+        });
+        return NextResponse.json({ data: newStopwatchSession });
+    }
+
     const timeToAdd = isBreak
         ? await getShortOrLongBreak(countdownId, projectId)
         : countdown.sessionTime;

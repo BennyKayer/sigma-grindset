@@ -6,7 +6,7 @@ import {
     ToggleButtonGroup,
     ToggleButtonGroupProps,
 } from "@mui/material";
-import { Gauge } from "@mui/x-charts/Gauge";
+import { Gauge, gaugeClasses } from "@mui/x-charts/Gauge";
 import { useEffect, useState, useContext } from "react";
 import {
     WorkContext,
@@ -44,32 +44,31 @@ export default function Timer() {
     const [isBreak, setIsBreak] = useState(false);
 
     // SEC: handlers
-    const handleResetTimer = (session: null | number) => {
+    const handleResetTimer = (breakTime: null | number) => {
         setTimerState(TimerState.STOPPED);
         setCurrentSession(null);
         const display = getTimeDisplay(
-            session ? session : currentCountdown?.sessionTime,
+            breakTime ? breakTime : currentCountdown?.sessionTime,
             TimeUnit.MIN,
         );
         setSessionDisplay(display);
-        setCurrDiff(100);
-        setMaxDiff(100);
+        if (currentCountdown) {
+            setCurrDiff(100);
+            setMaxDiff(100);
+        } else {
+            setCurrDiff(0);
+            setMaxDiff(100);
+        }
     };
 
     const handleSessionUpdate = (session: Session | null) => {
-        // Stop clicked => reset
+        // Handle stop
         if (!session) {
-            setCurrentSession(null);
-            setTimerState(TimerState.STOPPED);
-            const resetDisplay = getTimeDisplay(
-                currentCountdown?.sessionTime,
-                TimeUnit.MIN,
-            );
-            setSessionDisplay(resetDisplay);
-            setCurrDiff(100);
-            setMaxDiff(100);
+            handleResetTimer(session);
             return 0;
         }
+
+        // Shared between stopwatch and countdowns
         setCurrentSession(session);
         const { isPaused, isOnGoing } = session;
         if (isPaused) {
@@ -78,6 +77,21 @@ export default function Timer() {
             setTimerState(TimerState.STARTED);
         }
 
+        // Handle stopwatch
+        if (session.isStopwatch) {
+            // TODO: For now 1 hour
+            // make this configurable and add a sound signal
+            setMaxDiff(120 * 60);
+            const sessionCurrent =
+                getDiff(session.start, new Date(), TimeUnit.SECS) +
+                session.accumulatedSeconds;
+            setCurrDiff(sessionCurrent);
+            const display = getTimeDisplay(sessionCurrent, TimeUnit.SECS);
+            setSessionDisplay(display);
+            return sessionCurrent;
+        }
+
+        // Handle countdowns
         const sessionMax =
             getDiff(session.start, session.stop, TimeUnit.SECS) +
             session.accumulatedSeconds;
@@ -102,8 +116,8 @@ export default function Timer() {
         switch (state) {
             case TimerState.STARTED:
                 if (currentSession?.isPaused) {
-                    const unpaused = await resumeSession(currentSession.id);
-                    handleSessionUpdate(unpaused);
+                    const resumed = await resumeSession(currentSession.id);
+                    handleSessionUpdate(resumed);
                 } else {
                     const newSession = await createNewSession(
                         currentProject?.id,
@@ -115,22 +129,14 @@ export default function Timer() {
                 }
                 break;
             case TimerState.PAUSED:
-                if (currentSession && currentCountdown && currentProject) {
-                    const paused = await pauseSession(
-                        currentSession.id,
-                        currentCountdown.id,
-                        currentProject.id,
-                    );
+                if (currentSession) {
+                    const paused = await pauseSession(currentSession.id);
                     handleSessionUpdate(paused);
                 }
                 break;
             case TimerState.STOPPED:
-                if (currentSession && currentCountdown && currentProject) {
-                    const endedSession = await endSession(
-                        currentSession.id,
-                        currentCountdown.id,
-                        currentProject.id,
-                    );
+                if (currentSession) {
+                    const endedSession = await endSession(currentSession.id);
                     if (typeof endedSession === "number") {
                         setIsBreak(true);
                     } else {
@@ -147,20 +153,27 @@ export default function Timer() {
     // SEC: useEffect
     // Handle countdown change
     useEffect(() => {
+        // Need to set sessionTime from countdown info
         if (currentCountdown) {
             setSessionDisplay(
                 getTimeDisplay(currentCountdown.sessionTime, TimeUnit.MIN),
             );
+            setCurrDiff(100);
+        }
+        // For stopwatch set to 00:00
+        else {
+            setSessionDisplay("00:00");
+            setCurrDiff(0);
         }
     }, [currentCountdown]);
 
     // Retrieve session
     useEffect(() => {
         const retrieveLatestSession = async () => {
-            if (currentProject && currentCountdown) {
+            if (currentProject) {
                 const latestSession = await getLatestSession(
                     currentProject.id,
-                    currentCountdown.id,
+                    currentCountdown?.id,
                 );
 
                 // No session retrieved -> do nothing
@@ -184,15 +197,11 @@ export default function Timer() {
     useEffect(() => {
         let interval: ReturnType<typeof setInterval>;
 
-        if (currentSession && currentCountdown && currentProject) {
+        if (currentSession) {
             interval = setInterval(async () => {
                 const secsLeft = handleSessionUpdate(currentSession);
-                if (secsLeft <= 0) {
-                    const endedSession = await endSession(
-                        currentSession.id,
-                        currentCountdown.id,
-                        currentProject.id,
-                    );
+                if (secsLeft < 0) {
+                    const endedSession = await endSession(currentSession.id);
                     handleResetTimer(endedSession);
                     clearInterval(interval);
                 }
@@ -207,7 +216,7 @@ export default function Timer() {
         return () => {
             clearInterval(interval);
         };
-    }, [currentSession, currentCountdown, currentProject]);
+    }, [currentSession]);
 
     return (
         <Box
@@ -225,6 +234,18 @@ export default function Timer() {
                 startAngle={0}
                 endAngle={360}
                 text={sessionDisplay}
+                cornerRadius="50%"
+                sx={(theme) => ({
+                    [`& .${gaugeClasses.valueText}`]: {
+                        fontSize: 40,
+                    },
+                    [`& .${gaugeClasses.valueArc}`]: {
+                        fill: "#52b202",
+                    },
+                    [`& .${gaugeClasses.referenceArc}`]: {
+                        fill: theme.palette.text.disabled,
+                    },
+                })}
             />
             <ToggleButtonGroup onChange={handleTimerStateChange}>
                 <ToggleButton

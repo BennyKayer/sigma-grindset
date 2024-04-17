@@ -10,19 +10,10 @@ export enum SessionPatchTypes {
     endSession = "END_SESSION",
 }
 
-type PatchSessionBody = {
-    countdownId?: string;
-    projectId?: string;
-};
-export const patchSession = async (
-    id: string,
-    type: SessionPatchTypes,
-    body?: PatchSessionBody,
-) => {
+export const patchSession = async (id: string, type: SessionPatchTypes) => {
     const init: RequestInit = {
         method: "PATCH",
         body: JSON.stringify({
-            ...body,
             type,
         }),
     };
@@ -38,32 +29,21 @@ export const patchSession = async (
     return data as Session | number | null;
 };
 
+// TODO: There's some issue with paused sessions
+// they add some additional time to what's accumulated
+// fix later
 export const resumeSession = async (id: string) => {
     const patched = await patchSession(id, SessionPatchTypes.resume);
     return patched as Session;
 };
 
-export const pauseSession = async (
-    id: string,
-    countdownId: string,
-    projectId: string,
-) => {
-    const patched = await patchSession(id, SessionPatchTypes.pause, {
-        countdownId,
-        projectId,
-    });
+export const pauseSession = async (id: string) => {
+    const patched = await patchSession(id, SessionPatchTypes.pause);
     return patched as Session;
 };
 
-export const endSession = async (
-    id: string,
-    countdownId: string,
-    projectId: string,
-) => {
-    const patched = await patchSession(id, SessionPatchTypes.endSession, {
-        countdownId,
-        projectId,
-    });
+export const endSession = async (id: string) => {
+    const patched = await patchSession(id, SessionPatchTypes.endSession);
     return patched as null | number;
 };
 
