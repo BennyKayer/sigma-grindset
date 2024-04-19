@@ -2,7 +2,7 @@
 
 import ArrowLeftIcon from "@mui/icons-material/ArrowLeft";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
-import { Box, Divider, IconButton } from "@mui/material";
+import { Box, Divider, IconButton, Typography } from "@mui/material";
 import { useState } from "react";
 
 const MOCK = [
@@ -75,6 +75,8 @@ export default function NotesCarousel() {
                 sx={{
                     display: "flex",
                     gap: 2,
+                    height: "100%",
+                    alignItems: "center",
                 }}
             >
                 {items
@@ -85,13 +87,19 @@ export default function NotesCarousel() {
                                 key={el.id}
                                 sx={{
                                     backgroundColor: "background.paper",
-                                    width: "200px",
-                                    height: "200px",
+                                    width: "33%",
+                                    height: "80%",
+                                    borderRadius: 1,
+                                    padding: 2,
                                 }}
                             >
-                                {el.title}
+                                <Typography variant="h6" gutterBottom>
+                                    {el.title}
+                                </Typography>
                                 <Divider />
-                                {el.content}
+                                <Typography variant="body1">
+                                    {el.content}
+                                </Typography>
                             </Box>
                         );
                     })}
