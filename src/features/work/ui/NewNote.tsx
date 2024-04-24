@@ -1,11 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Box, IconButton, TextField, TextFieldProps } from "@mui/material";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import { format } from "@formkit/tempo";
+import { postProjectNote } from "@/services/projects";
+import { WorkContext } from "@/features/work";
 
 export default function NewNote() {
+    const { currentProject, setNotes, notes } = useContext(WorkContext);
+
     const [noteTitle, setNoteTitle] = useState("");
     const [noteContent, setNoteContent] = useState("");
 
@@ -18,7 +22,15 @@ export default function NewNote() {
         setNoteContent(event.target.value);
     };
 
-    const handleAddNote = () => {};
+    const handleAddNote = async () => {
+        if (currentProject) {
+            const newNote = await postProjectNote(currentProject.id, {
+                header: noteTitle.length ? noteTitle : undefined,
+                content: noteContent,
+            });
+            setNotes([...notes, newNote]);
+        }
+    };
 
     return (
         <Box
@@ -52,7 +64,11 @@ export default function NewNote() {
                     justifyContent: "flex-end",
                 }}
             >
-                <IconButton color="primary" onClick={handleAddNote}>
+                <IconButton
+                    color="primary"
+                    onClick={handleAddNote}
+                    disabled={!currentProject}
+                >
                     <AddCircleIcon />
                 </IconButton>
             </Box>

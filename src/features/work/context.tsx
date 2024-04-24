@@ -1,6 +1,6 @@
 "use client";
 
-import { Countdown, Project } from "@prisma/client";
+import { Countdown, Note, Project } from "@prisma/client";
 import {
     Dispatch,
     PropsWithChildren,
@@ -12,28 +12,35 @@ import {
 type WorkContextType = {
     currentProject: Project | null;
     currentCountdown: Countdown | null;
+    notes: Note[];
     setCurrentCountdown: Dispatch<SetStateAction<Countdown | null>>;
     setCurrentProject: Dispatch<SetStateAction<Project | null>>;
+    setNotes: Dispatch<SetStateAction<Note[]>>;
 };
 export const WorkContext = createContext<WorkContextType>({
     currentProject: null,
     currentCountdown: null,
+    notes: [],
     setCurrentCountdown: () => null,
     setCurrentProject: () => null,
+    setNotes: () => null,
 });
 
 type WorkProviderProps = PropsWithChildren<{}>;
 export const WorkProvider = ({ children }: WorkProviderProps) => {
-    const [currentProject, setCurrentProject] = useState<Project | null>(null);
-    const [currentCountdown, setCurrentCountdown] = useState<Countdown | null>(
-        null,
-    );
+    const [currentProject, setCurrentProject] =
+        useState<WorkContextType["currentProject"]>(null);
+    const [currentCountdown, setCurrentCountdown] =
+        useState<WorkContextType["currentCountdown"]>(null);
+    const [notes, setNotes] = useState<WorkContextType["notes"]>([]);
 
     const value = {
         currentCountdown,
         currentProject,
+        notes,
         setCurrentCountdown,
         setCurrentProject,
+        setNotes,
     };
 
     return (
