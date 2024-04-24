@@ -4,17 +4,13 @@ import { format } from "@formkit/tempo";
 
 type Params = {
     params: {
-        projectId: string;
+        id: string;
     };
 };
 
-// TODO: This should probably be nest under projects/id
-// however I don't anticipate adding /id for notes for now
-// that's why it stays here
-
 export const GET = async (_: NextRequest, params: Params) => {
     const {
-        params: { projectId },
+        params: { id: projectId },
     } = params;
     const notes = await prisma.note.findMany({
         where: {
@@ -31,7 +27,7 @@ export const GET = async (_: NextRequest, params: Params) => {
 export const POST = async (req: NextRequest, params: Params) => {
     const { header, content } = await req.json();
     const {
-        params: { projectId },
+        params: { id: projectId },
     } = params;
 
     const newNote = await prisma.note.create({

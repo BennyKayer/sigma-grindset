@@ -18,13 +18,8 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import StopIcon from "@mui/icons-material/Stop";
 import { Session } from "@prisma/client";
-import {
-    createNewSession,
-    endSession,
-    getLatestSession,
-    pauseSession,
-    resumeSession,
-} from "@/services/session";
+import { endSession, pauseSession, resumeSession } from "@/services/session";
+import { createNewSession, getLatestSession } from "@/services/projects";
 
 enum TimerState {
     STOPPED = "STOPPED",

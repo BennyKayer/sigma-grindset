@@ -7,14 +7,14 @@ import { TimeUnit, getDiff } from "@/features/work";
 
 type Params = {
     params: {
-        projectId: string;
+        id: string;
         countdownId: string | undefined;
     };
 };
 
 export const GET = async (req: NextRequest, params: Params) => {
     const {
-        params: { projectId, countdownId },
+        params: { id: projectId, countdownId },
     } = params;
     const { searchParams } = new URL(req.url);
     const shouldGetLatest = toBoolean(searchParams.get("latest"));
@@ -101,7 +101,7 @@ const NewSessionBody = z.object({
 });
 export const POST = async (req: NextRequest, params: Params) => {
     const {
-        params: { projectId, countdownId },
+        params: { id: projectId, countdownId },
     } = params;
     const { isBreak } = NewSessionBody.parse(await req.json());
 
