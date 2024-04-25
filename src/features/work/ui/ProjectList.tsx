@@ -30,7 +30,8 @@ export default function ProjectList(props: ProjectListProps) {
     const [projects, setProjects] = useState<AugmentedProject[]>([]);
     const [newProjectName, setNewProjectName] = useState("");
     const [projectNameError, setProjectNameError] = useState(false);
-    const { setCurrentProject, currentProject } = useContext(WorkContext);
+    const { setCurrentProject, currentProject, currentSession } =
+        useContext(WorkContext);
 
     // SEC: handlers
     const handleNewProjectNameChange: TextFieldProps["onChange"] = (event) => {
@@ -147,6 +148,7 @@ export default function ProjectList(props: ProjectListProps) {
                             key={id}
                             secondaryAction={
                                 <IconButton
+                                    disabled={!!currentSession}
                                     onClick={() => handleEditProjects(el)}
                                 >
                                     {editing ? <EditOffIcon /> : <EditIcon />}
@@ -155,6 +157,7 @@ export default function ProjectList(props: ProjectListProps) {
                             disablePadding
                         >
                             <ListItemButton
+                                disabled={!!currentSession}
                                 onClick={() => handleCurrentProjectChange(el)}
                                 selected={currentProject?.id === id}
                             >

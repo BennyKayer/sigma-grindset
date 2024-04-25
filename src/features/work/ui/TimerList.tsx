@@ -19,7 +19,8 @@ import { WorkContext } from "@/features/work";
 type TimerListProps = {} & BoxProps;
 export default function TimerList(props: TimerListProps) {
     const [countdowns, setCountdowns] = useState<Countdown[]>([]);
-    const { setCurrentCountdown, currentCountdown } = useContext(WorkContext);
+    const { setCurrentCountdown, currentCountdown, currentSession } =
+        useContext(WorkContext);
 
     // SEC: handlers
     const handleSelectCountdown = (newCountdown: Countdown | null) => {
@@ -56,6 +57,7 @@ export default function TimerList(props: TimerListProps) {
                 </ListItem>
                 <ListItem disablePadding>
                     <ListItemButton
+                        disabled={!!currentSession}
                         selected={currentCountdown === null}
                         onClick={() => handleSelectCountdown(null)}
                     >
@@ -68,13 +70,14 @@ export default function TimerList(props: TimerListProps) {
                         <ListItem
                             key={id}
                             secondaryAction={
-                                <IconButton>
+                                <IconButton disabled={!!currentSession}>
                                     <SettingsIcon />
                                 </IconButton>
                             }
                             disablePadding
                         >
                             <ListItemButton
+                                disabled={!!currentSession}
                                 selected={id === currentCountdown?.id}
                                 onClick={() => handleSelectCountdown(el)}
                             >

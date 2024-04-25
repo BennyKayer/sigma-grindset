@@ -28,11 +28,15 @@ enum TimerState {
 }
 
 export default function Timer() {
-    const { currentCountdown, currentProject } = useContext(WorkContext);
+    const {
+        currentCountdown,
+        currentProject,
+        currentSession,
+        setCurrentSession,
+    } = useContext(WorkContext);
     const [timerState, setTimerState] = useState<TimerState>(
         TimerState.STOPPED,
     );
-    const [currentSession, setCurrentSession] = useState<Session | null>(null);
     const [sessionDisplay, setSessionDisplay] = useState("00:00");
     const [currDiff, setCurrDiff] = useState(100);
     const [maxDiff, setMaxDiff] = useState(100);
