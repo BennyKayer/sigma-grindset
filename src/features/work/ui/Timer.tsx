@@ -239,7 +239,7 @@ export default function Timer() {
                         fontSize: 40,
                     },
                     [`& .${gaugeClasses.valueArc}`]: {
-                        fill: "#52b202",
+                        fill: theme.palette.info.light,
                     },
                     [`& .${gaugeClasses.referenceArc}`]: {
                         fill: theme.palette.text.disabled,

@@ -33,7 +33,7 @@ export const POST = async (req: NextRequest, params: Params) => {
     const newNote = await prisma.note.create({
         data: {
             content,
-            header: header ? header : format(new Date(), "DD.MM.YYYY"),
+            header: header ? header : format(new Date(), "HH:mm DD.MM.YYYY"),
             projectId,
         },
     });
