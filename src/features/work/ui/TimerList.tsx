@@ -8,6 +8,7 @@ import {
     ListItemButton,
     ListItemText,
     IconButton,
+    Typography,
 } from "@mui/material";
 import { Countdown } from "@prisma/client";
 import { useState, useEffect, useContext } from "react";
@@ -40,9 +41,19 @@ export default function TimerList(props: TimerListProps) {
                 sx={{
                     width: "100%",
                     height: "100%",
-                    bgcolor: "background.paper",
+                    border: "1px solid silver",
+                    borderRadius: "15px",
                 }}
             >
+                <ListItem
+                    disablePadding
+                    sx={{
+                        borderBottom: "1px solid silver",
+                        padding: 2,
+                    }}
+                >
+                    <Typography variant="h6">Timers</Typography>
+                </ListItem>
                 <ListItem disablePadding>
                     <ListItemButton
                         selected={currentCountdown === null}

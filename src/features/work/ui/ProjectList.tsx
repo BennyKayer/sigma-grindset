@@ -10,6 +10,7 @@ import {
     ListItemText,
     TextField,
     TextFieldProps,
+    Typography,
 } from "@mui/material";
 import { getProjects, patchProject, postNewProject } from "@/services/projects";
 import { useEffect, useState, useContext } from "react";
@@ -124,11 +125,21 @@ export default function ProjectList(props: ProjectListProps) {
                 sx={{
                     width: "100%",
                     height: "100%",
-                    bgcolor: "background.paper",
                     display: "flex",
                     flexDirection: "column",
+                    border: "1px solid silver",
+                    borderRadius: "15px",
                 }}
             >
+                <Typography
+                    variant="h5"
+                    sx={{
+                        padding: 2,
+                        borderBottom: "1px solid silver",
+                    }}
+                >
+                    Projects
+                </Typography>
                 {projects.map((el) => {
                     const { id, name, editing } = el;
                     return (

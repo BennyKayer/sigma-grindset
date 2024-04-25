@@ -3,7 +3,7 @@
 import { useContext, useState } from "react";
 import { Box, IconButton, TextField, TextFieldProps } from "@mui/material";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
-import { format } from "@formkit/tempo";
+import { format, isBefore } from "@formkit/tempo";
 import { postProjectNote } from "@/services/projects";
 import { WorkContext } from "@/features/work";
 
@@ -28,7 +28,11 @@ export default function NewNote() {
                 header: noteTitle.length ? noteTitle : undefined,
                 content: noteContent,
             });
-            setNotes([...notes, newNote]);
+            // Restore original order of notes pre reassigning them
+            const sortedNotes = notes.sort((a, b) =>
+                isBefore(new Date(a.updatedAt), new Date(b.updatedAt)) ? 1 : -1,
+            );
+            setNotes([newNote, ...sortedNotes]);
         }
     };
 
@@ -39,9 +43,10 @@ export default function NewNote() {
                 height: "100%",
                 display: "grid",
                 gridTemplateRows: "min-content 1fr min-content",
-                backgroundColor: "background.paper",
                 p: 2,
                 gap: 1,
+                border: "1px solid silver",
+                borderRadius: "15px",
             }}
         >
             <TextField

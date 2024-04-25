@@ -2,13 +2,28 @@
 
 import ArrowLeftIcon from "@mui/icons-material/ArrowLeft";
 import ArrowRightIcon from "@mui/icons-material/ArrowRight";
-import { Box, Divider, IconButton, Typography } from "@mui/material";
+import {
+    Box,
+    Divider,
+    IconButton,
+    Typography,
+    useMediaQuery,
+    useTheme,
+} from "@mui/material";
 import { useContext, useEffect } from "react";
 import { WorkContext } from "@/features/work/context";
 import { getProjectNotes } from "@/services/projects";
 
 export default function NotesCarousel() {
+    const { breakpoints } = useTheme();
+    const isDesktop = useMediaQuery(breakpoints.up("lg"));
+    const isLargeDesktop = useMediaQuery(breakpoints.up("xl"));
     const { currentProject, notes, setNotes } = useContext(WorkContext);
+    const indexesDisplayed = isLargeDesktop
+        ? [0, 1, 2]
+        : isDesktop
+          ? [0, 1]
+          : [0];
 
     // SEC: handlers
     // This move is simply going to work in a pop / shift fashion
@@ -66,7 +81,7 @@ export default function NotesCarousel() {
                 }}
             >
                 {notes
-                    .filter((_, index) => index in [0, 1, 2])
+                    .filter((_, index) => index in indexesDisplayed)
                     .map((el) => {
                         return (
                             <Box
@@ -74,15 +89,27 @@ export default function NotesCarousel() {
                                 sx={{
                                     backgroundColor: "background.paper",
                                     height: "80%",
+                                    width: "100%",
                                     borderRadius: 1,
                                     padding: 2,
                                 }}
                             >
-                                <Typography variant="h6" gutterBottom>
+                                <Typography
+                                    variant="h6"
+                                    gutterBottom
+                                    sx={{
+                                        borderBottom: "1px solid silver",
+                                    }}
+                                >
                                     {el.header}
                                 </Typography>
                                 <Divider />
-                                <Typography variant="body1">
+                                <Typography
+                                    variant="body1"
+                                    sx={{
+                                        padding: "8px",
+                                    }}
+                                >
                                     {el.content}
                                 </Typography>
                             </Box>
