@@ -1,8 +1,29 @@
 import { ENVS } from "@/utils/env";
-import { Session } from "@prisma/client";
+import { Countdown, Project, Session } from "@prisma/client";
 
 const ENDPOINT = `${ENVS.apiUrl}/session`;
 
+export const getLatestSession = async () => {
+    const init: RequestInit = {
+        method: "GET",
+    };
+    const url = new URL(ENDPOINT);
+    url.searchParams.append("latest", "true");
+
+    const req = new Request(url, init);
+    const res = await fetch(req);
+
+    if (!res.ok) {
+        throw new Error("Failed to get latest session");
+    }
+    const { data } = await res.json();
+    return data as
+        | (Session & { countdown: Countdown; project: Project })
+        | null
+        | number;
+};
+
+// SEC: /[id]
 export enum SessionPatchTypes {
     start = "START",
     pause = "PAUSE",

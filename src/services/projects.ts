@@ -103,26 +103,6 @@ export const postProjectNote = async (
 //#endregion
 
 // SEC: Sessions
-export const getLatestSession = async (
-    projectId: string | undefined,
-    countdownId: string | undefined,
-) => {
-    const init: RequestInit = {
-        method: "GET",
-    };
-    const url = new URL(`${ENDPOINT}/${projectId}/session/${countdownId}`);
-    url.searchParams.append("latest", "true");
-
-    const req = new Request(url, init);
-    const res = await fetch(req);
-
-    if (!res.ok) {
-        throw new Error("Failed to get latest session");
-    }
-    const { data } = await res.json();
-    return data as Session | null | number;
-};
-
 export const createNewSession = async (
     projectId: string | undefined,
     countdownId: string | undefined,

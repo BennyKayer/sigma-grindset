@@ -18,8 +18,13 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import StopIcon from "@mui/icons-material/Stop";
 import { Session } from "@prisma/client";
-import { endSession, pauseSession, resumeSession } from "@/services/session";
-import { createNewSession, getLatestSession } from "@/services/projects";
+import {
+    endSession,
+    pauseSession,
+    resumeSession,
+    getLatestSession,
+} from "@/services/session";
+import { createNewSession } from "@/services/projects";
 
 enum TimerState {
     STOPPED = "STOPPED",
@@ -33,6 +38,8 @@ export default function Timer() {
         currentProject,
         currentSession,
         setCurrentSession,
+        setCurrentCountdown,
+        setCurrentProject,
     } = useContext(WorkContext);
     const [timerState, setTimerState] = useState<TimerState>(
         TimerState.STOPPED,
@@ -153,6 +160,8 @@ export default function Timer() {
     // Handle countdown change
     useEffect(() => {
         // Need to set sessionTime from countdown info
+        // but only when there's no info from session
+        if (currentSession) return;
         if (currentCountdown) {
             setSessionDisplay(
                 getTimeDisplay(currentCountdown.sessionTime, TimeUnit.MIN),
@@ -164,33 +173,31 @@ export default function Timer() {
             setSessionDisplay("00:00");
             setCurrDiff(0);
         }
-    }, [currentCountdown]);
+    }, [currentCountdown, currentSession]);
 
     // Retrieve session
     useEffect(() => {
         const retrieveLatestSession = async () => {
-            if (currentProject) {
-                const latestSession = await getLatestSession(
-                    currentProject.id,
-                    currentCountdown?.id,
-                );
+            const latestSession = await getLatestSession();
 
-                // No session retrieved -> do nothing
-                if (!latestSession) return;
+            // No session retrieved -> do nothing
+            if (!latestSession) return;
 
-                // Break time retrieved -> set timer to break
-                if (typeof latestSession === "number") {
-                    handleResetTimer(latestSession);
-                    setIsBreak(true);
-                    return;
-                } else {
-                    handleSessionUpdate(latestSession);
-                    setIsBreak(false);
-                }
+            // Break time retrieved -> set timer to break
+            if (typeof latestSession === "number") {
+                handleResetTimer(latestSession);
+                setIsBreak(true);
+                return;
+            } else {
+                const { countdown, project } = latestSession;
+                handleSessionUpdate(latestSession);
+                setCurrentCountdown(countdown);
+                setCurrentProject(project);
+                setIsBreak(false);
             }
         };
         retrieveLatestSession();
-    }, [currentProject, currentCountdown]);
+    }, []);
 
     // Manage session changes
     useEffect(() => {
