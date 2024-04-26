@@ -67,21 +67,23 @@ export const GET = async (req: NextRequest, params: Params) => {
                 data: { ...latestSession, start, stop },
             });
         } else {
-            // Maybe there's a stopwatch session?
-            const latestStopwatch = await prisma.session.findMany({
-                where: {
-                    projectId,
-                    AND: {
-                        OR: [{ isOnGoing: true }, { isPaused: true }],
+            if (!projectId) {
+                // Maybe there's a stopwatch session?
+                const latestStopwatch = await prisma.session.findMany({
+                    where: {
+                        projectId,
+                        AND: {
+                            OR: [{ isOnGoing: true }, { isPaused: true }],
+                        },
                     },
-                },
-                orderBy: {
-                    updatedAt: "desc",
-                },
-                take: 1,
-            });
-            if (latestStopwatch.length) {
-                return NextResponse.json({ data: latestStopwatch[0] });
+                    orderBy: {
+                        updatedAt: "desc",
+                    },
+                    take: 1,
+                });
+                if (latestStopwatch.length) {
+                    return NextResponse.json({ data: latestStopwatch[0] });
+                }
             }
 
             return NextResponse.json({ data: null });
