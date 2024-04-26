@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getShortOrLongBreak, prisma } from "@/utils/db";
+import { prisma } from "@/utils/db";
 import { toBoolean } from "@/utils/types";
 import { TimeUnit, getDiff } from "@/features/work";
 import { addSecond } from "@formkit/tempo";
@@ -40,7 +40,6 @@ export const GET = async (req: NextRequest) => {
             }
 
             // Retrieved session is overdue, end it
-            // then award a break
             if (diff <= 0) {
                 await prisma.session.update({
                     where: {
@@ -50,12 +49,7 @@ export const GET = async (req: NextRequest) => {
                         isOnGoing: false,
                     },
                 });
-                const { countdownId, projectId } = latestSession;
-                const breakTime = await getShortOrLongBreak(
-                    countdownId,
-                    projectId,
-                );
-                return NextResponse.json({ data: breakTime });
+                return NextResponse.json({ data: null });
             }
             // The dates won't be updated on session
             // need to adjust this for initial display

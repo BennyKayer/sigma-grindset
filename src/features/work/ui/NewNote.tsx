@@ -23,7 +23,7 @@ export default function NewNote() {
     };
 
     const handleAddNote = async () => {
-        if (currentProject) {
+        if (currentProject && noteContent.length) {
             const newNote = await postProjectNote(currentProject.id, {
                 header: noteTitle.length ? noteTitle : undefined,
                 content: noteContent,
@@ -33,6 +33,18 @@ export default function NewNote() {
                 isBefore(new Date(a.updatedAt), new Date(b.updatedAt)) ? 1 : -1,
             );
             setNotes([newNote, ...sortedNotes]);
+            setNoteContent("");
+            setNoteTitle("");
+        }
+    };
+
+    const handleEnter: TextFieldProps["onKeyDown"] = (e) => {
+        const { code, shiftKey } = e;
+        if (code === "Enter") {
+            if (!shiftKey) {
+                e.preventDefault();
+                handleAddNote();
+            }
         }
     };
 
@@ -57,11 +69,12 @@ export default function NewNote() {
             />
             <TextField
                 multiline
-                placeholder="Your note here..."
+                placeholder={`Your note here...\nShift + Enter for new line\nEnter to submit`}
                 value={noteContent}
                 onChange={onContentChange}
                 variant="outlined"
                 rows={10}
+                onKeyDown={handleEnter}
             />
             <Box
                 sx={{

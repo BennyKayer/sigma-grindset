@@ -183,18 +183,11 @@ export default function Timer() {
             // No session retrieved -> do nothing
             if (!latestSession) return;
 
-            // Break time retrieved -> set timer to break
-            if (typeof latestSession === "number") {
-                handleResetTimer(latestSession);
-                setIsBreak(true);
-                return;
-            } else {
-                const { countdown, project } = latestSession;
-                handleSessionUpdate(latestSession);
-                setCurrentCountdown(countdown);
-                setCurrentProject(project);
-                setIsBreak(false);
-            }
+            const { countdown, project } = latestSession;
+            handleSessionUpdate(latestSession);
+            setCurrentCountdown(countdown);
+            setCurrentProject(project);
+            setIsBreak(false);
         };
         retrieveLatestSession();
     }, []);

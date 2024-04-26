@@ -19,8 +19,7 @@ export const getLatestSession = async () => {
     const { data } = await res.json();
     return data as
         | (Session & { countdown: Countdown; project: Project })
-        | null
-        | number;
+        | null;
 };
 
 // SEC: /[id]
