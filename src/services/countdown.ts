@@ -3,7 +3,7 @@ import { Countdown } from "@prisma/client";
 
 const ENDPOINT = `${ENVS.apiUrl}/countdown`;
 
-export const getUserCountdowns = async () => {
+export const getUserCountdowns = async (): Promise<Countdown[]> => {
     const init: RequestInit = {
         method: "GET",
     };

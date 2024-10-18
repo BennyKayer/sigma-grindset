@@ -15,8 +15,9 @@ model User {
   clerkId String @unique
   email   String @unique
 
-  projects   Project[]
-  countdowns Countdown[]
+  projects      Project[]
+  countdowns    Countdown[]
+  elasticHabits ElasticHabit[]
 }
 
 model Project {
@@ -79,8 +80,28 @@ model Session {
   isOnGoing          Boolean  @default(true)
   isBreak            Boolean  @default(false)
 
-  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project     Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
   projectId   String
   countdown   Countdown? @relation(fields: [countdownId], references: [id], onDelete: Cascade)
   countdownId String?
+}
+
+model ElasticHabit {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name         String
+  levels       String[]
+  // TODO: Should be templated
+  // like I want to use a template of legendary so I create
+  // an ElasticHabit with blank name and levels prefixed with trivial:, easy: etc.
+  isTemplate   Boolean
+  // We can't really do 180min of work without doing 90 min 
+  // along the way
+  isSequential Boolean
+  // TODO: Dailies, weeklies etc.
+  // schedule ?????
+  User         User?    @relation(fields: [userId], references: [id])
+  userId       String?
 }
