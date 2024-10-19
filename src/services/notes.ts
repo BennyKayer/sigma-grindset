@@ -2,7 +2,7 @@ import { ENVS } from "@/utils/env";
 
 const ENDPOINT = `${ENVS.apiUrl}/notes`;
 
-export const getNoteById = async (id: string) => {
+export const httpGetNoteById = async (id: string) => {
     const init: RequestInit = {
         method: "GET",
     };

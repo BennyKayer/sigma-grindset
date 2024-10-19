@@ -1,8 +1,9 @@
 import { ENVS } from "@/utils/env";
+import { ElasticHabit } from "@prisma/client";
 
 const ENDPOINT = `${ENVS.apiUrl}/elasticHabits`;
 
-export const getUserElasticHabits = async () => {
+export const httpGetUserElasticHabits = async (): Promise<ElasticHabit[]> => {
     const init: RequestInit = {
         method: "GET",
     };

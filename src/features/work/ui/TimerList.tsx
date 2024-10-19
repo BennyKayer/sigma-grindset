@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { Countdown } from "@prisma/client";
 import { useState, useEffect, useContext } from "react";
-import { getUserCountdowns } from "@/services/countdown";
+import { httpGetUserCountdowns } from "@/services/countdown";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { WorkContext } from "@/features/work";
 
@@ -30,7 +30,7 @@ export default function TimerList(props: TimerListProps) {
     // SEC: useEffect
     useEffect(() => {
         const setupCountdowns = async () => {
-            const userCountdowns = await getUserCountdowns();
+            const userCountdowns = await httpGetUserCountdowns();
             setCountdowns(userCountdowns);
         };
         setupCountdowns();

@@ -5,7 +5,7 @@ const ENDPOINT = `${ENVS.apiUrl}/projects`;
 
 // SEC: Projects
 //#region
-export const getProjects = async () => {
+export const httpGetProjects = async () => {
     const init: RequestInit = {
         method: "GET",
     };
@@ -20,7 +20,7 @@ export const getProjects = async () => {
     return data as Project[];
 };
 
-export const postNewProject = async (name: string) => {
+export const httpPostNewProject = async (name: string) => {
     const init: RequestInit = {
         method: "POST",
         body: JSON.stringify({
@@ -39,7 +39,7 @@ export const postNewProject = async (name: string) => {
 };
 
 // /[id]
-export const patchProject = async (name: string, id: string) => {
+export const httpPatchProject = async (name: string, id: string) => {
     const init: RequestInit = {
         method: "PATCH",
         body: JSON.stringify({
@@ -61,7 +61,7 @@ export const patchProject = async (name: string, id: string) => {
 
 // SEC: Notes
 //#region
-export const getProjectNotes = async (projectId: string) => {
+export const httpGetProjectNotes = async (projectId: string) => {
     const init: RequestInit = {
         method: "GET",
     };
@@ -81,7 +81,7 @@ type PostProjectBody = {
     header?: string;
     content: string;
 };
-export const postProjectNote = async (
+export const httpPostProjectNote = async (
     projectId: string,
     body: PostProjectBody,
 ) => {
@@ -103,7 +103,7 @@ export const postProjectNote = async (
 //#endregion
 
 // SEC: Sessions
-export const createNewSession = async (
+export const httpCreateNewSession = async (
     projectId: string | undefined,
     countdownId: string | undefined,
     isBreak: boolean,

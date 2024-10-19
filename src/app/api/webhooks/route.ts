@@ -4,6 +4,7 @@ import { UserJSON, WebhookEvent } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/utils/db";
 import countdownsJson from "@/data/countdowns.json";
+import elasticHabitsJson from "@/data/templateHabits.json";
 
 export async function POST(req: Request) {
     // You can find this in the Clerk Dashboard -> Webhooks -> choose the webhook
@@ -67,18 +68,32 @@ export async function POST(req: Request) {
                 userId: newUser.id,
             };
         });
+        const elasticHabits = elasticHabitsJson.map((el) => {
+            return {
+                ...el,
+                userId: newUser.id,
+            };
+        });
+
         await prisma.countdown.createMany({
             data: countdowns,
+        });
+        await prisma.elasticHabit.createMany({
+            data: elasticHabits,
         });
         return new NextResponse("", { status: 201 });
     }
     // Delete user from my db
     if (eventType === "user.deleted") {
-        await prisma.user.delete({
-            where: {
-                clerkId,
-            },
-        });
+        try {
+            await prisma.user.delete({
+                where: {
+                    clerkId,
+                },
+            });
+        } catch (error) {
+            return new NextResponse(undefined, { status: 204 });
+        }
         return new NextResponse(undefined, { status: 204 });
     }
     // Update user in my db

@@ -1,19 +1,12 @@
 "use client";
 
-import { ExpandLess, ExpandMore } from "@mui/icons-material";
-import {
-    Box,
-    Collapse,
-    List,
-    ListItemButton,
-    ListItemText,
-    ListSubheader,
-    ToggleButton,
-    ToggleButtonGroup,
-    ToggleButtonGroupProps,
-} from "@mui/material";
-import { useState } from "react";
+import { Box } from "@mui/material";
+import { ElasticHabits } from "@/features/plan/ui/ElasticHabits";
 
 export default function PlanPage() {
-    return <Box></Box>;
+    return (
+        <Box>
+            <ElasticHabits />
+        </Box>
+    );
 }

@@ -16,6 +16,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { DrawerLinks, LINKS } from "@/features/menu";
 import { usePathname } from "next/navigation";
 import { WorkProvider } from "@/features/work";
+import { ReactQueryProvider } from "@/features/shared/ui/ReactQueryProvider";
 
 const drawerWidth = 140;
 
@@ -124,7 +125,9 @@ export default function DashBoardLayout({ children }: DashBoardLayoutProps) {
                 }}
             >
                 <Toolbar />
-                <WorkProvider>{children}</WorkProvider>
+                <ReactQueryProvider>
+                    <WorkProvider>{children}</WorkProvider>
+                </ReactQueryProvider>
             </Box>
         </Box>
     );

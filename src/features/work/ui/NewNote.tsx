@@ -4,7 +4,7 @@ import { useContext, useState } from "react";
 import { Box, IconButton, TextField, TextFieldProps } from "@mui/material";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
 import { format, isBefore } from "@formkit/tempo";
-import { postProjectNote } from "@/services/projects";
+import { httpPostProjectNote } from "@/services/projects";
 import { WorkContext } from "@/features/work";
 
 export default function NewNote() {
@@ -24,7 +24,7 @@ export default function NewNote() {
 
     const handleAddNote = async () => {
         if (currentProject && noteContent.length) {
-            const newNote = await postProjectNote(currentProject.id, {
+            const newNote = await httpPostProjectNote(currentProject.id, {
                 header: noteTitle.length ? noteTitle : undefined,
                 content: noteContent,
             });

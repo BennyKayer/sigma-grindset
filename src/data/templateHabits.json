@@ -1,0 +1,32 @@
+[
+    {
+        "name": "Epic Daily",
+        "levels": ["Trivial:", "Easy:", "Medium:", "Hard:", "Epic:"],
+        "isTemplate": true,
+        "isSequential": true
+    },
+    {
+        "name": "Hard Daily",
+        "levels": ["Easy:", "Medium:", "Hard:"],
+        "isTemplate": true,
+        "isSequential": true
+    },
+    {
+        "name": "Morning Ritual",
+        "levels": ["Brush Teeth", "Drink Water"],
+        "isTemplate": false,
+        "isSequential": false
+    },
+    {
+        "name": "Afternoon Ritual",
+        "levels": ["Stretch", "Walk", "Training"],
+        "isTemplate": false,
+        "isSequential": false
+    },
+    {
+        "name": "Evening Ritual",
+        "levels": ["Brush Teeth", "Pray"],
+        "isTemplate": false,
+        "isSequential": false
+    }
+]

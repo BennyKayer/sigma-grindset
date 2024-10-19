@@ -19,12 +19,12 @@ import PauseIcon from "@mui/icons-material/Pause";
 import StopIcon from "@mui/icons-material/Stop";
 import { Session } from "@prisma/client";
 import {
-    endSession,
-    pauseSession,
-    resumeSession,
-    getLatestSession,
+    httpEndSession,
+    httpPauseSession,
+    httpResumeSession,
+    httpGetLatestSession,
 } from "@/services/session";
-import { createNewSession } from "@/services/projects";
+import { httpCreateNewSession } from "@/services/projects";
 
 enum TimerState {
     STOPPED = "STOPPED",
@@ -122,10 +122,10 @@ export default function Timer() {
         switch (state) {
             case TimerState.STARTED:
                 if (currentSession?.isPaused) {
-                    const resumed = await resumeSession(currentSession.id);
+                    const resumed = await httpResumeSession(currentSession.id);
                     handleSessionUpdate(resumed);
                 } else {
-                    const newSession = await createNewSession(
+                    const newSession = await httpCreateNewSession(
                         currentProject?.id,
                         currentCountdown?.id,
                         isBreak,
@@ -136,13 +136,15 @@ export default function Timer() {
                 break;
             case TimerState.PAUSED:
                 if (currentSession) {
-                    const paused = await pauseSession(currentSession.id);
+                    const paused = await httpPauseSession(currentSession.id);
                     handleSessionUpdate(paused);
                 }
                 break;
             case TimerState.STOPPED:
                 if (currentSession) {
-                    const endedSession = await endSession(currentSession.id);
+                    const endedSession = await httpEndSession(
+                        currentSession.id,
+                    );
                     if (typeof endedSession === "number") {
                         setIsBreak(true);
                     } else {
@@ -178,7 +180,7 @@ export default function Timer() {
     // Retrieve session
     useEffect(() => {
         const retrieveLatestSession = async () => {
-            const latestSession = await getLatestSession();
+            const latestSession = await httpGetLatestSession();
 
             // No session retrieved -> do nothing
             if (!latestSession) return;
@@ -200,7 +202,9 @@ export default function Timer() {
             interval = setInterval(async () => {
                 const secsLeft = handleSessionUpdate(currentSession);
                 if (secsLeft < 0) {
-                    const endedSession = await endSession(currentSession.id);
+                    const endedSession = await httpEndSession(
+                        currentSession.id,
+                    );
                     handleResetTimer(endedSession);
                     clearInterval(interval);
                 }

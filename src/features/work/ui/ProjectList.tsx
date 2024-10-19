@@ -12,7 +12,11 @@ import {
     TextFieldProps,
     Typography,
 } from "@mui/material";
-import { getProjects, patchProject, postNewProject } from "@/services/projects";
+import {
+    httpGetProjects,
+    httpPatchProject,
+    httpPostNewProject,
+} from "@/services/projects";
 import { useEffect, useState, useContext } from "react";
 import { Project } from "@prisma/client";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
@@ -52,7 +56,7 @@ export default function ProjectList(props: ProjectListProps) {
             return;
         }
 
-        const newProject = await postNewProject(newProjectName);
+        const newProject = await httpPostNewProject(newProjectName);
         setProjects([...projects, newProject]);
         setNewProjectName("");
     };
@@ -69,7 +73,7 @@ export default function ProjectList(props: ProjectListProps) {
                 // Only patch when there's edit text
                 // then clear it
                 if (el.editText) {
-                    patchProject(el.editText, el.id);
+                    httpPatchProject(el.editText, el.id);
                     return {
                         ...el,
                         name: el.editText,
@@ -111,7 +115,7 @@ export default function ProjectList(props: ProjectListProps) {
     // SEC: useEffect
     useEffect(() => {
         const setupProjects = async () => {
-            const projects = await getProjects();
+            const projects = await httpGetProjects();
             setProjects(projects);
             if (projects.length) {
                 setCurrentProject(projects[0]);

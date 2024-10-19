@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { useContext, useEffect } from "react";
 import { WorkContext } from "@/features/work/context";
-import { getProjectNotes } from "@/services/projects";
+import { httpGetProjectNotes } from "@/services/projects";
 
 export default function NotesCarousel() {
     const { breakpoints } = useTheme();
@@ -50,7 +50,9 @@ export default function NotesCarousel() {
     useEffect(() => {
         if (currentProject) {
             const setupProjectsNotes = async () => {
-                const projectNotes = await getProjectNotes(currentProject?.id);
+                const projectNotes = await httpGetProjectNotes(
+                    currentProject?.id,
+                );
                 setNotes(projectNotes);
             };
             setupProjectsNotes();
